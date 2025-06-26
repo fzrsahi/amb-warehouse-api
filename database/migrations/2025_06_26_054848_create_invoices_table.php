@@ -13,6 +13,38 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+
+            // Sesuai dengan No. KUITANSI -> GTOPOD25060000044J
+            $table->string('invoice_number')->unique()->comment('Nomor unik kuitansi/invoice.');
+
+            // Sesuai dengan Telah Terima Dari -> KOTAG PUTRA GORONTALO
+            $table->foreignId('company_id')->constrained('companies')->comment('ID Perusahaan/Mitra yang ditagih.');
+
+            // Sesuai dengan Petugas -> Moh. Zulfikar Amrain
+            $table->foreignId('created_by_user_id')->constrained('users')->comment('ID Petugas yang membuat invoice.');
+
+            // Sesuai dengan keterangan -> Chargeable Weight: 157 kg
+            $table->decimal('total_chargeable_weight', 10, 2)->comment('Akumulasi berat yang ditagih dari semua item.');
+
+            // Kolom untuk setiap komponen biaya
+            $table->decimal('cargo_handling_fee', 15, 2)->default(0.00);
+            $table->decimal('air_handling_fee', 15, 2)->default(0.00)->comment('Biaya Handling Udara/Uap Air.');
+            $table->decimal('inspection_fee', 15, 2)->default(0.00)->comment('Jasa Pemeriksaan Kargo.');
+            $table->decimal('admin_fee', 15, 2)->default(0.00);
+
+            // Kolom untuk total perhitungan
+            $table->decimal('subtotal', 15, 2)->comment('Total biaya sebelum pajak dan PNBP.');
+            $table->decimal('tax_amount', 15, 2)->comment('Jumlah Pajak (PPN 11%).');
+            $table->decimal('pnbp_amount', 15, 2)->comment('Jumlah PNBP.');
+            $table->decimal('total_amount', 15, 2)->comment('Jumlah akhir tagihan yang harus dibayar.');
+
+            // Status pembayaran invoice
+            $table->enum('status', ['draft', 'unpaid', 'paid', 'void'])->default('unpaid');
+
+            // Sesuai dengan tanggal di kanan bawah -> 05 June 2025
+            $table->date('issued_at')->comment('Tanggal invoice diterbitkan.');
+            $table->timestamp('paid_at')->nullable()->comment('Tanggal invoice dibayar.');
+
             $table->timestamps();
         });
     }

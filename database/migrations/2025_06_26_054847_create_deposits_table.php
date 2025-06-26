@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('deposits', function (Blueprint $table) {
             $table->id();
+            $table->timestamp('deposit_at');
+            $table->foreignId('created_by_user_id')->constrained('users');
+            $table->foreignId('accepted_by_user_id')->nullable()->constrained('users');
+            $table->decimal('nominal', 15, 2);
+            $table->foreignId('company_id')->constrained('companies');
+            $table->string('status')->default('pending');
+            $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
         });
     }
