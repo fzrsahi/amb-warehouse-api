@@ -36,13 +36,17 @@ class CompanyController extends Controller
             return $this->successResponse([
                 'company' => $company,
             ], 'Mitra baru berhasil dibuat');
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return $this->validationErrorResponse($e->errors(), 'Validasi gagal');
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat membuat mitra baru: ' . $e->getMessage());
             DB::rollBack();
             return $this->serverErrorResponse('Terjadi kesalahan saat membuat mitra baru');
         }
+    }
+
+
+    public function index()
+    {
+        $companies = Company::all();
+        return $this->successResponse($companies, 'Mitra berhasil diambil');
     }
 }

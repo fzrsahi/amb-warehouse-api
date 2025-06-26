@@ -15,4 +15,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/companies', [CompanyController::class, 'store'])->middleware('can:create company');
+
+    Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all companies');
 });

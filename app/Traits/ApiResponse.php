@@ -3,36 +3,35 @@
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
-use function collect;
 
 trait ApiResponse
 {
     /**
-     * Success response
+     * Membangun respons sukses.
      */
     protected function successResponse($data = null, string $message = 'Success', int $code = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $data
+            'data'    => $data,
         ], $code);
     }
 
     /**
-     * Error response
+     * Membangun respons error.
      */
     protected function errorResponse(string $message = 'Error', int $code = 400, $data = null): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => $data
+            'data'    => $data,
         ], $code);
     }
 
     /**
-     * Not found response
+     * Respons untuk 404 Not Found.
      */
     protected function notFoundResponse(string $message = 'Data tidak ditemukan'): JsonResponse
     {
@@ -40,7 +39,7 @@ trait ApiResponse
     }
 
     /**
-     * Unauthorized response
+     * Respons untuk 401 Unauthorized (otentikasi gagal).
      */
     protected function unauthorizedResponse(string $message = 'Unauthorized'): JsonResponse
     {
@@ -48,26 +47,33 @@ trait ApiResponse
     }
 
     /**
-     * Validation error response
+     * Respons untuk 403 Forbidden (otorisasi/hak akses gagal).
      */
-    protected function validationErrorResponse($errors, string $message = 'Validation failed'): JsonResponse
+    protected function forbiddenResponse(string $message = 'Akses ditolak'): JsonResponse
     {
+        return $this->errorResponse($message, 403);
+    }
+
+    /**
+     * Respons untuk 422 Unprocessable Entity (validasi gagal).
+     */
+    protected function validationErrorResponse($errors, string $message = 'Validasi gagal'): JsonResponse
+    {
+        // Ambil pesan error pertama dari array validasi
         $firstMessage = $message;
         if (is_array($errors) && !empty($errors)) {
             $firstError = collect($errors)->first();
             if (is_array($firstError) && !empty($firstError)) {
                 $firstMessage = $firstError[0] ?? $message;
-            } elseif (is_string($firstError)) {
-                $firstMessage = $firstError;
             }
         }
-        return $this->errorResponse($firstMessage, 422, null);
+        return $this->errorResponse($firstMessage, 422);
     }
 
     /**
-     * Server error response
+     * Respons untuk 500 Internal Server Error.
      */
-    protected function serverErrorResponse(string $message = 'Internal server error'): JsonResponse
+    protected function serverErrorResponse(string $message = 'Terjadi kesalahan pada server'): JsonResponse
     {
         return $this->errorResponse($message, 500);
     }
