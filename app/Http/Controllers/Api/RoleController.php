@@ -42,7 +42,6 @@ class RoleController extends Controller
 
             $result = $this->handlePaginationWithFormat($rolesQuery, $request, ["id", "name"]);
 
-            // Handle permissions pivot hiding for both collection and pagination
             if (isset($result['data'])) {
                 foreach ($result['data'] as $role) {
                     $role->permissions->makeHidden('pivot');
@@ -53,7 +52,10 @@ class RoleController extends Controller
                 }
             }
 
-            return $this->successResponse($result, 'Daftar peran berhasil diambil.');
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, message: 'Daftar peran berhasil diambil.', code: 200, pagination: $pagination);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil daftar peran: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil daftar peran.');

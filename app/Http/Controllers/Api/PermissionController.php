@@ -42,7 +42,10 @@ class PermissionController extends Controller
 
             $result = $this->handlePaginationWithFormat($permissionsQuery, $request, ['id', 'name']);
 
-            return $this->successResponse($result, 'Daftar izin berhasil diambil.');
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, 'Daftar izin berhasil diambil.', code: 200, pagination: $pagination);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil daftar izin: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil daftar izin.');

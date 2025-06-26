@@ -9,13 +9,22 @@ trait ApiResponse
     /**
      * Membangun respons sukses.
      */
-    protected function successResponse($data = null, string $message = 'Success', int $code = 200): JsonResponse
+    protected function successResponse($data = null, string $message = 'Success', int $code = 200, $pagination = null): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data'    => $data,
-        ], $code);
+        if ($pagination) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data'    => $data,
+                'pagination' => $pagination,
+            ], $code);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data'    => $data,
+            ], $code);
+        }
     }
 
     /**

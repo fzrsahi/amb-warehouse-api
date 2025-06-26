@@ -55,7 +55,10 @@ class CompanyController extends Controller
             $query = Company::query();
             $result = $this->handlePaginationWithFormat($query, $request);
 
-            return $this->successResponse($result, 'Mitra berhasil diambil');
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, 'Mitra berhasil diambil', code: 200, pagination: $pagination);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil data mitra: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data mitra');

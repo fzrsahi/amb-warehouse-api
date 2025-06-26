@@ -59,6 +59,6 @@ trait PaginationTrait
             return $this->formatPaginationResponse($result);
         }
 
-        return ['data' => $result];
+        return $result;
     }
 }
