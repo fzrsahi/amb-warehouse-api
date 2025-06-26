@@ -35,10 +35,10 @@ trait PaginationTrait
         return [
             'data' => $paginator->items(),
             'pagination' => [
-                'currentPage' => $paginator->currentPage(),
-                'perPage' => $paginator->perPage(),
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
                 'total' => $paginator->total(),
-                'lastPage' => $paginator->lastPage(),
+                'last_page' => $paginator->lastPage(),
             ]
         ];
     }
