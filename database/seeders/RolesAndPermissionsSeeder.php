@@ -50,6 +50,8 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create role', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit role', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete role', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view role', 'guard_name' => 'web']);
+
 
         // Permissions
         Permission::create(['name' => 'view all permissions', 'guard_name' => 'web']);
@@ -60,7 +62,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
-        $warehouseStaffRole = Role::create(['name' => 'warehouse-staff', 'guard_name' => 'web']);
+        $warehouseStaffRole = Role::create(['name' => 'warehouse-staff', 'guard_name' => 'web', 'type' => 'warehouse']);
         $warehouseStaffRole->givePermissionTo([
             'view all items', // Warehouse staff need to see all physical items
             'create item',
@@ -68,17 +70,25 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // 2. Role: Partner Admin (Client Company Staff)
-        $partnerAdminRole = Role::create(['name' => 'company-admin', 'guard_name' => 'web']);
+        $partnerAdminRole = Role::create(['name' => 'company-admin', 'guard_name' => 'web', 'type' => 'company']);
         $partnerAdminRole->givePermissionTo([
             'view own company',
             'view own items',
             'view own invoices',
             'request deposit',
-            'create user', // Can add other staff from their company
+            'view all roles',
+            'view all permissions',
+            'create user',
+            'edit user',
+            'view role',
+            'edit role',
+            'delete role',
+            'create role',
+            'view all roles',
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)
-        $warehouseAdminRole = Role::create(['name' => 'warehouse-admin', 'guard_name' => 'web']);
+        $warehouseAdminRole = Role::create(['name' => 'warehouse-admin', 'guard_name' => 'web', 'type' => 'warehouse']);
         $warehouseAdminRole->givePermissionTo([
             'view all items',
             'delete item',
@@ -91,10 +101,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'create user',
             'edit user',
             'view all roles',
+            "view all permissions",
         ]);
 
         // 4. Role: Super Admin (Full Access)
-        $superAdminRole = Role::create(['name' => 'super-admin', 'guard_name' => 'web']);
+        $superAdminRole = Role::create(['name' => 'super-admin', 'guard_name' => 'web', 'type' => 'super-admin']);
         $superAdminRole->givePermissionTo(Permission::all());
     }
 }

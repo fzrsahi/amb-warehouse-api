@@ -29,7 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
-
+    Route::post('/roles', [RoleController::class, 'store'])->middleware('can:create role');
+    Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('can:view role');
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('can:edit role');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('can:delete role');
 
     Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view all permissions');
 });

@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     $message = 'Data tidak ditemukan.';
                 } elseif ($e instanceof NotFoundHttpException) {
                     $statusCode = 404;
-                    $message = 'Endpoint tidak ditemukan.';
+                $message = 'Data tidak ditemukan.';
                 }
 
                 // Jika mode debug aktif dan ini error server, tampilkan pesan asli
