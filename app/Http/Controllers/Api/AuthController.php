@@ -48,4 +48,14 @@ class AuthController extends Controller
             return $this->serverErrorResponse('Terjadi kesalahan saat logout');
         }
     }
+
+    public function session(Request $request)
+    {
+        $user = $request->user();
+
+        return $this->successResponse([
+            'name' => $user->name,
+            'role' => $user->roles->pluck('name'),
+        ], 'Session berhasil diambil');
+    }
 }

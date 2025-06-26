@@ -40,8 +40,8 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit company', 'guard_name' => 'web']);
 
         // Users
-        Permission::create(['name' => 'manage warehouse users', 'guard_name' => 'web']); // Mengelola user internal
-        Permission::create(['name' => 'manage mitra users', 'guard_name' => 'web']); // Mitra bisa mengelola user di perusahaannya
+        Permission::create(['name' => 'manage warehouse users', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage mitra users', 'guard_name' => 'web']);
 
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
