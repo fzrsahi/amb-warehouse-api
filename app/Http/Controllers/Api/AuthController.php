@@ -53,9 +53,16 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        return $this->successResponse([
+        $response = [
             'name' => $user->name,
             'role' => $user->roles->pluck('name'),
-        ], 'Session berhasil diambil');
+            'permissions' => $user->getPermissionsViaRoles()->pluck('name'),
+        ];
+
+        if ($user->company_id) {
+            $response['company'] = $user->company;
+        }
+
+        return $this->successResponse($response, 'Session berhasil diambil');
     }
 }

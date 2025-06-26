@@ -25,13 +25,12 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
-            $user = User::create([
+            User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'company_id' => $request->company_id,
             ]);
-            $user->assignRole('admin-mitra');
             DB::commit();
             return $this->successResponse(null, 'User berhasil dibuat');
         } catch (\Exception $e) {

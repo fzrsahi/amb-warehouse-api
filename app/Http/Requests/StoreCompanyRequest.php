@@ -29,33 +29,44 @@ class StoreCompanyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => 'required|string|max:255|unique:companies,name',
-            'email'     => 'required|email|max:255|unique:companies,email',
-            'phone'     => 'required|string|max:20',
-            'address'   => 'required|string',
-            'logo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'company_name'      => 'required|string|max:255|unique:companies,name',
+            'company_email'     => 'required|email|max:255|unique:companies,email',
+            'company_phone'     => 'required|string|max:20|nullable',
+            'company_address'   => 'required|string|nullable',
+            'company_logo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'user_name'         => 'required|string|max:255',
+            'user_email'        => 'required|email|max:255|unique:users,email',
+            'user_password'     => 'required|string|min:8|confirmed',
+
+
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama perusahaan wajib diisi',
-            'name.string' => 'Nama perusahaan harus berupa teks',
-            'name.max' => 'Nama perusahaan maksimal 255 karakter',
-            'name.unique' => 'Nama perusahaan sudah terdaftar',
-            'email.required' => 'email wajib diisi',
-            'email.email' => 'Format email tidak valid',
-            'email.max' => 'Email maksimal 255 karakter',
-            'email.unique' => 'Email sudah terdaftar',
-            'phone.required' => 'Nomor telepon wajib diisi',
-            'phone.string' => 'Nomor telepon harus berupa teks',
-            'phone.max' => 'Nomor telepon maksimal 20 karakter',
-            'address.required' => 'Alamat wajib diisi',
-            'address.string' => 'Alamat harus berupa teks',
-            'logo.image' => 'File logo harus berupa gambar',
-            'logo.mimes' => 'Format logo harus jpeg, png, jpg, gif, atau svg',
-            'logo.max' => 'Ukuran logo maksimal 2MB',
+            'company_name.required' => 'Nama perusahaan wajib diisi',
+            'company_name.string' => 'Nama perusahaan harus berupa teks',
+            'company_name.max' => 'Nama perusahaan maksimal 255 karakter',
+            'company_name.unique' => 'Nama perusahaan sudah terdaftar',
+            'company_email.required' => 'email wajib diisi',
+            'company_email.email' => 'Format email tidak valid',
+            'company_email.max' => 'Email maksimal 255 karakter',
+            'company_email.unique' => 'Email sudah terdaftar',
+            'company_phone.required' => 'Nomor telepon wajib diisi',
+            'company_phone.string' => 'Nomor telepon harus berupa teks',
+            'company_phone.max' => 'Nomor telepon maksimal 20 karakter',
+            'company_address.required' => 'Alamat wajib diisi',
+            'company_address.string' => 'Alamat harus berupa teks',
+            'company_logo.image' => 'File logo harus berupa gambar',
+            'company_logo.mimes' => 'Format logo harus jpeg, png, jpg, gif, atau svg',
+            'company_logo.max' => 'Ukuran logo maksimal 2MB',
+            'user_name.required' => 'Nama user wajib diisi',
+            'user_name.string' => 'Nama user harus berupa teks',
+            'user_name.max' => 'Nama user maksimal 255 karakter',
+            'user_email.required' => 'Email user wajib diisi',
+            'user_email.email' => 'Format email tidak valid',
+            'user_email.max' => 'Email user maksimal 255 karakter',
         ];
     }
 

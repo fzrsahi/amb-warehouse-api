@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\RoleController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -22,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
+
+
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
 });
