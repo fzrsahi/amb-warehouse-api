@@ -28,8 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
 
 
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:manage roles');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
 
 
-    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:manage permissions');
+    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view all permissions');
 });

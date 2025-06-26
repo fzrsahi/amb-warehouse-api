@@ -44,9 +44,10 @@ return new class extends Migration
 
             $table->foreignId('accepted_by_user_id')->constrained('users')->comment('ID Petugas yang menerima barang.');
 
-            $table->timestamp('accepted_at')->nullable()->comment('Waktu barang diterima di gudang asal.');
+            $table->timestamp('accepted_at')->nullable();
 
-            $table->timestamp('departed_at')->nullable()->comment('Waktu barang keluar dari gudang asal.');
+            $table->timestamp('in_at')->nullable()->comment('Waktu barang masuk.');
+            $table->timestamp('out_at')->nullable()->comment('Waktu barang keluar.');
 
             $table->timestamps();
         });

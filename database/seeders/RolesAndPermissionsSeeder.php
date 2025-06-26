@@ -40,13 +40,22 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit company', 'guard_name' => 'web']); // Mengedit perusahaan
 
         // Users
-        Permission::create(['name' => 'manage warehouse users', 'guard_name' => 'web']);
-        Permission::create(['name' => 'manage company users', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all users', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create user', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit user', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete user', 'guard_name' => 'web']);
 
         // Roles
-        Permission::create(['name' => 'manage roles', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all roles', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create role', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit role', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete role', 'guard_name' => 'web']);
 
-        Permission::create(['name' => 'manage permissions', 'guard_name' => 'web']);
+        // Permissions
+        Permission::create(['name' => 'view all permissions', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create permissions', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit permissions', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete permissions', 'guard_name' => 'web']);
 
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
@@ -65,7 +74,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view own items',
             'view own invoices',
             'request deposit',
-            'manage company users', // Can add other staff from their company
+            'create user', // Can add other staff from their company
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)
@@ -78,7 +87,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'approve deposit',
             'view all companies',
             'edit company',
-            'manage warehouse users',
+            'view all users',
+            'create user',
+            'edit user',
+            'view all roles',
         ]);
 
         // 4. Role: Super Admin (Full Access)
