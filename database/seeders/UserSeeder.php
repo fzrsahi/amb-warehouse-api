@@ -8,15 +8,22 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        User::create([
+        // Buat user Super Admin dan langsung berikan role 'super-admin'
+        $superAdmin = User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@gmail.com',
             'password' => Hash::make('password'),
         ]);
+        $superAdmin->assignRole('super-admin');
+
+        // Contoh membuat Petugas Gudang
+        $warehouseStaff = User::create([
+            'name' => 'Budi Gudang',
+            'email' => 'warehousestaff@gmail.com',
+            'password' => Hash::make('password'),
+        ]);
+        $warehouseStaff->assignRole('petugas-gudang');
     }
 }

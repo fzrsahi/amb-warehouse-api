@@ -6,16 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    public function users() {
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+        'logo',
+    ];
+
+    public function users()
+    {
         return $this->hasMany(User::class);
     }
-    public function deposits() {
+    public function deposits()
+    {
         return $this->hasMany(Deposit::class);
     }
-    public function items() {
+    public function items()
+    {
         return $this->hasMany(Item::class);
     }
-    public function invoices() {
+    public function invoices()
+    {
         return $this->hasMany(Invoice::class);
     }
 }

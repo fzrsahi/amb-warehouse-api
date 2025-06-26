@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
+use function collect;
 
 trait ApiResponse
 {
@@ -51,7 +52,16 @@ trait ApiResponse
      */
     protected function validationErrorResponse($errors, string $message = 'Validation failed'): JsonResponse
     {
-        return $this->errorResponse($message, 422, $errors);
+        $firstMessage = $message;
+        if (is_array($errors) && !empty($errors)) {
+            $firstError = collect($errors)->first();
+            if (is_array($firstError) && !empty($firstError)) {
+                $firstMessage = $firstError[0] ?? $message;
+            } elseif (is_string($firstError)) {
+                $firstMessage = $firstError;
+            }
+        }
+        return $this->errorResponse($firstMessage, 422, null);
     }
 
     /**
