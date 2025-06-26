@@ -37,7 +37,7 @@ class CompanyController extends Controller
                 'company_id' => $company->id,
             ]);
 
-            $user->assignRole('admin-mitra');
+            $user->assignRole('company-admin');
             DB::commit();
             return $this->successResponse(null, 'Mitra baru berhasil dibuat');
         } catch (\Exception $e) {

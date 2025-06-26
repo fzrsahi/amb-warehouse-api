@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -19,11 +20,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/companies', [CompanyController::class, 'store'])->middleware('can:create company');
     Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all companies');
+    Route::get('/companies/my', [CompanyController::class, 'myCompany'])->middleware('can:view own company');
+    Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('can:edit company');
 
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
 
 
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:manage roles');
+
+
+    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:manage permissions');
 });

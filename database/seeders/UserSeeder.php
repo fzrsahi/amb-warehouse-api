@@ -24,6 +24,6 @@ class UserSeeder extends Seeder
             'email' => 'warehousestaff@gmail.com',
             'password' => Hash::make('password'),
         ]);
-        $warehouseStaff->assignRole('petugas-gudang');
+        $warehouseStaff->assignRole('warehouse-staff');
     }
 }
