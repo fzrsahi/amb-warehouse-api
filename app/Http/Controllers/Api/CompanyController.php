@@ -4,16 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\PaginationRequest;
 use App\Models\Company;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use App\Traits\PaginationTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, PaginationTrait;
 
     public function store(StoreCompanyRequest $request)
     {
@@ -47,10 +49,16 @@ class CompanyController extends Controller
         }
     }
 
-
-    public function index()
+    public function index(PaginationRequest $request)
     {
-        $companies = Company::all();
-        return $this->successResponse($companies, 'Mitra berhasil diambil');
+        try {
+            $query = Company::query();
+            $result = $this->handlePaginationWithFormat($query, $request);
+
+            return $this->successResponse($result, 'Mitra berhasil diambil');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil data mitra: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data mitra');
+        }
     }
 }

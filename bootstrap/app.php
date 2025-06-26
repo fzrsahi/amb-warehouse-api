@@ -51,13 +51,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 $message = 'Data tidak ditemukan.';
                 }
 
-                // Jika mode debug aktif dan ini error server, tampilkan pesan asli
-                if (config('app.debug') && $statusCode === 500 && !empty($e->getMessage())) {
+            if (config('app.debug') && $statusCode === 500 && !empty($e->getMessage())) {
                     $message = $e->getMessage();
                 }
 
-                // Kembalikan respons JSON yang konsisten
-                return response()->json([
+            return response()->json([
                     'success' => false,
                     'message' => $message,
                     'data'    => null,

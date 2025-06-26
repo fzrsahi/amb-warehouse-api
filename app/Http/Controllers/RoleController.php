@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Spatie\Permission\Models\Role;
 use App\Traits\ApiResponse;
+use App\Traits\PaginationTrait;
+use App\Http\Requests\PaginationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,9 +14,9 @@ use App\Http\Requests\UpdateRoleRequest;
 
 class RoleController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, PaginationTrait;
 
-    public function index(Request $request)
+    public function index(PaginationRequest $request)
     {
         try {
             $user = $request->user();
@@ -33,15 +35,24 @@ class RoleController extends Controller
                 $rolesQuery->whereRaw('1 = 0');
             }
 
-            $roles = $rolesQuery->with(['permissions' => function ($query) {
+            $rolesQuery->with(['permissions' => function ($query) {
                 $query->select('id', 'name');
-            }])->get(["id", "name"]);
+            }]);
 
-            $roles->each(function ($role) {
-                $role->permissions->makeHidden('pivot');
-            });
+            $result = $this->handlePaginationWithFormat($rolesQuery, $request, ["id", "name"]);
 
-            return $this->successResponse($roles, 'Daftar peran berhasil diambil.');
+            // Handle permissions pivot hiding for both collection and pagination
+            if (isset($result['data'])) {
+                foreach ($result['data'] as $role) {
+                    $role->permissions->makeHidden('pivot');
+                }
+            } else {
+                foreach ($result as $role) {
+                    $role->permissions->makeHidden('pivot');
+                }
+            }
+
+            return $this->successResponse($result, 'Daftar peran berhasil diambil.');
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil daftar peran: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil daftar peran.');

@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\PaginationRequest;
 use Spatie\Permission\Models\Permission;
 use App\Traits\ApiResponse;
+use App\Traits\PaginationTrait;
 use Illuminate\Support\Facades\Log;
 
 class PermissionController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, PaginationTrait;
 
-    public function index(Request $request)
+    public function index(PaginationRequest $request)
     {
         try {
             $user = $request->user();
@@ -38,9 +39,9 @@ class PermissionController extends Controller
                 $permissionsQuery->whereRaw('1 = 0');
             }
 
-            $permissions = $permissionsQuery->get(['id', 'name']);
+            $result = $this->handlePaginationWithFormat($permissionsQuery, $request, ['id', 'name']);
 
-            return $this->successResponse($permissions, 'Daftar izin berhasil diambil.');
+            return $this->successResponse($result, 'Daftar izin berhasil diambil.');
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil daftar izin: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil daftar izin.');
