@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreAirlineRequest extends FormRequest
+class StoreLocationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,23 +26,18 @@ class StoreAirlineRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama airline harus diisi',
-            'name.string' => 'Nama airline harus berupa string',
-            'name.max' => 'Nama airline maksimal 255 karakter',
-            'code.required' => 'Kode airline harus diisi',
-            'code.string' => 'Kode airline harus berupa string',
-            'code.max' => 'Kode airline maksimal 255 karakter',
-            'price.required' => 'Harga harus diisi',
-            'price.numeric' => 'Harga harus berupa angka',
-            'price.min' => 'Harga harus lebih dari 0',
-            'price.regex' => 'Harga harus berupa angka dan maksimal 2 desimal',
+            'name.required' => 'Nama lokasi harus diisi',
+            'name.string' => 'Nama lokasi harus berupa string',
+            'name.max' => 'Nama lokasi maksimal 255 karakter',
+            'code.required' => 'Kode lokasi harus diisi',
+            'code.string' => 'Kode lokasi harus berupa string',
+            'code.max' => 'Kode lokasi maksimal 255 karakter',
         ];
     }
 

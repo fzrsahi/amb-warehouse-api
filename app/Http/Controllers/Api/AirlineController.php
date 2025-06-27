@@ -36,7 +36,7 @@ class AirlineController extends Controller
     {
         try {
             $airline = Airline::create($request->all());
-            return $this->successResponse($airline, 'Data airline berhasil dibuat', code: 201);
+            return $this->successResponse(null, 'Data airline berhasil dibuat', code: 201);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat membuat data airline: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat membuat data airline');
@@ -47,7 +47,7 @@ class AirlineController extends Controller
     {
         try {
             $airline->update($request->all());
-            return $this->successResponse($airline, 'Data airline berhasil diubah', code: 200);
+            return $this->successResponse(null, 'Data airline berhasil diubah', code: 200);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengubah data airline: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengubah data airline');

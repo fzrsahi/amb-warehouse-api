@@ -25,8 +25,8 @@ class UpdateAirlineRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:airlines,code,' . $this->airline->id,
-            'price' => 'required|numeric',
+            'code' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
         ];
     }
 
@@ -39,9 +39,10 @@ class UpdateAirlineRequest extends FormRequest
             'code.required' => 'Kode airline harus diisi',
             'code.string' => 'Kode airline harus berupa string',
             'code.max' => 'Kode airline maksimal 255 karakter',
-            'code.unique' => 'Kode airline sudah ada',
             'price.required' => 'Harga harus diisi',
             'price.numeric' => 'Harga harus berupa angka',
+            'price.min' => 'Harga harus lebih dari 0',
+            'price.regex' => 'Harga harus berupa angka dan maksimal 2 desimal',
         ];
     }
 

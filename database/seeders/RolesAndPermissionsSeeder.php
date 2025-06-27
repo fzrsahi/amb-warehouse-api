@@ -15,102 +15,197 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // === BUAT DAFTAR HAK AKSES (PERMISSIONS) ===
-        // Lebih baik definisikan semua kemungkinan izin di sini
+        // Permissions berdasarkan tabel-tabel yang ada di migrasi
 
         // Items
-        Permission::create(['name' => 'view own items', 'guard_name' => 'web']); // Hanya lihat item milik perusahaannya
-        Permission::create(['name' => 'view all items', 'guard_name' => 'web']); // Lihat semua item dari semua perusahaan
+        Permission::create(['name' => 'view all item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view own item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show item', 'guard_name' => 'web']);
         Permission::create(['name' => 'create item', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit item', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete item', 'guard_name' => 'web']);
 
         // Invoices
-        Permission::create(['name' => 'view own invoices', 'guard_name' => 'web']); // Hanya lihat invoice milik perusahaannya
-        Permission::create(['name' => 'view all invoices', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view own invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show invoice', 'guard_name' => 'web']);
         Permission::create(['name' => 'create invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete invoice', 'guard_name' => 'web']);
 
-        // Deposits
-        Permission::create(['name' => 'request deposit', 'guard_name' => 'web']); // Mitra bisa request deposit
-        Permission::create(['name' => 'approve deposit', 'guard_name' => 'web']); // Admin internal yang menyetujui
+        // Invoice Items
+        Permission::create(['name' => 'view all invoice_item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show invoice_item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create invoice_item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit invoice_item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete invoice_item', 'guard_name' => 'web']);
 
         // Companies
-        Permission::create(['name' => 'view own company', 'guard_name' => 'web']); // Melihat data perusahaannya sendiri
-        Permission::create(['name' => 'view all companies', 'guard_name' => 'web']); // Melihat semua perusahaan
-        Permission::create(['name' => 'create company', 'guard_name' => 'web']); // Membuat perusahaan
-        Permission::create(['name' => 'edit company', 'guard_name' => 'web']); // Mengedit perusahaan
-        Permission::create(['name' => 'delete company', 'guard_name' => 'web']); // Menghapus perusahaan
+        Permission::create(['name' => 'view all company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view own company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete company', 'guard_name' => 'web']);
 
         // Users
-        Permission::create(['name' => 'view all users', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all user', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show user', 'guard_name' => 'web']);
         Permission::create(['name' => 'create user', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit user', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete user', 'guard_name' => 'web']);
 
         // Roles
-        Permission::create(['name' => 'view all roles', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all role', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show role', 'guard_name' => 'web']);
         Permission::create(['name' => 'create role', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit role', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete role', 'guard_name' => 'web']);
-        Permission::create(['name' => 'view role', 'guard_name' => 'web']);
-
 
         // Permissions
-        Permission::create(['name' => 'view all permissions', 'guard_name' => 'web']);
-        Permission::create(['name' => 'create permissions', 'guard_name' => 'web']);
-        Permission::create(['name' => 'edit permissions', 'guard_name' => 'web']);
-        Permission::create(['name' => 'delete permissions', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all permission', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show permission', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create permission', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit permission', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete permission', 'guard_name' => 'web']);
 
         // Airlines
-        Permission::create(['name' => 'view all airlines', 'guard_name' => 'web']);
+        Permission::create(['name' => 'view all airline', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show airline', 'guard_name' => 'web']);
         Permission::create(['name' => 'create airline', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit airline', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete airline', 'guard_name' => 'web']);
+
+        // Locations
+        Permission::create(['name' => 'view all location', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show location', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create location', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit location', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete location', 'guard_name' => 'web']);
+
+        // Flights
+        Permission::create(['name' => 'view all flight', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show flight', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create flight', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit flight', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete flight', 'guard_name' => 'web']);
+
+        // Deposits
+        Permission::create(['name' => 'view all deposit', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show deposit', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create deposit', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit deposit', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete deposit', 'guard_name' => 'web']);
+
+        // Remarks
+        Permission::create(['name' => 'view all remark', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show remark', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create remark', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit remark', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete remark', 'guard_name' => 'web']);
 
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
         $warehouseStaffRole = Role::create(['name' => 'warehouse-staff', 'guard_name' => 'web', 'type' => 'warehouse']);
         $warehouseStaffRole->givePermissionTo([
-            'view all items', // Warehouse staff need to see all physical items
+            'view all item',
+            'show item',
             'create item',
             'edit item',
+            'view all flight',
+            'show flight',
+            'view all location',
+            'show location',
         ]);
 
         // 2. Role: Partner Admin (Client Company Staff)
         $partnerAdminRole = Role::create(['name' => 'company-admin', 'guard_name' => 'web', 'type' => 'company']);
         $partnerAdminRole->givePermissionTo([
+            'view all company',
             'view own company',
-            'view own items',
-            'view own invoices',
-            'request deposit',
-            'view all roles',
-            'view all permissions',
+            'show company',
+            'view all item',
+            'view own item',
+            'show item',
+            'view all invoice',
+            'view own invoice',
+            'show invoice',
+            'view all deposit',
+            'show deposit',
+            'create deposit',
+            'view all remark',
+            'show remark',
+            'create remark',
+            'view all user',
+            'show user',
             'create user',
-            'view all users',
             'edit user',
-            'view role',
+            'view all role',
+            'show role',
             'edit role',
             'delete role',
             'create role',
-            'view all roles',
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)
         $warehouseAdminRole = Role::create(['name' => 'warehouse-admin', 'guard_name' => 'web', 'type' => 'warehouse']);
         $warehouseAdminRole->givePermissionTo([
-            'view all items',
+            'view all item',
+            'view own item',
+            'show item',
+            'create item',
+            'edit item',
             'delete item',
-            'view all invoices',
+            'view all invoice',
+            'view own invoice',
+            'show invoice',
             'create invoice',
-            'approve deposit',
-            'view all companies',
+            'edit invoice',
+            'delete invoice',
+            'view all invoice_item',
+            'show invoice_item',
+            'create invoice_item',
+            'edit invoice_item',
+            'delete invoice_item',
+            'view all deposit',
+            'show deposit',
+            'create deposit',
+            'edit deposit',
+            'delete deposit',
+            'view all company',
+            'show company',
             'edit company',
             'delete company',
-            'view all users',
+            'view all user',
+            'show user',
             'create user',
             'edit user',
-            'view all roles',
-            "view all permissions",
+            'delete user',
+            'view all role',
+            'show role',
+            'view all permission',
+            'show permission',
+            'view all airline',
+            'show airline',
+            'create airline',
+            'edit airline',
+            'delete airline',
+            'view all location',
+            'show location',
+            'create location',
+            'edit location',
+            'delete location',
+            'view all flight',
+            'show flight',
+            'create flight',
+            'edit flight',
+            'delete flight',
+            'view all remark',
+            'show remark',
+            'create remark',
+            'edit remark',
+            'delete remark',
         ]);
 
         // 4. Role: Super Admin (Full Access)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\AirlineController;
+use App\Http\Controllers\Api\LocationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -20,28 +21,34 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/companies', [CompanyController::class, 'store'])->middleware('can:create company');
-    Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all companies');
+    Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all company');
     Route::get('/companies/my', [CompanyController::class, 'myCompany'])->middleware('can:view own company');
     Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('can:edit company');
     Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->middleware('can:delete company');
 
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
-    Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
+    Route::get('/users', [UserController::class, 'index'])->middleware('can:view all user');
     Route::put('/users/{user}', [UserController::class, 'update'])->middleware('can:edit user');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('can:delete user');
 
-    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all role');
     Route::post('/roles', [RoleController::class, 'store'])->middleware('can:create role');
-    Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('can:view role');
+    Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('can:show role');
     Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('can:edit role');
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('can:delete role');
 
-    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view all permissions');
+    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view all permission');
 
 
-    Route::get('/airlines', [AirlineController::class, 'index'])->middleware('can:view all airlines');
+    Route::get('/airlines', [AirlineController::class, 'index'])->middleware('can:view all airline');
     Route::post('/airlines', [AirlineController::class, 'store'])->middleware('can:create airline');
     Route::put('/airlines/{airline}', [AirlineController::class, 'update'])->middleware('can:edit airline');
     Route::delete('/airlines/{airline}', [AirlineController::class, 'destroy'])->middleware('can:delete airline');
+
+
+    Route::get('/locations', [LocationController::class, 'index'])->middleware('can:view all location');
+    Route::post('/locations', [LocationController::class, 'store'])->middleware('can:create location');
+    Route::put('/locations/{location}', [LocationController::class, 'update'])->middleware('can:edit location');
+    Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('can:delete location');
 });

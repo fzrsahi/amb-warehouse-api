@@ -122,6 +122,11 @@ class RoleController extends Controller
         try {
             DB::beginTransaction();
 
+            if ($role->name === 'super-admin') {
+                DB::rollBack();
+                return $this->errorResponse('Peran super-admin tidak dapat diubah.', 422);
+            }
+
             $user = $request->user();
             $userRole = $user->roles->first();
             $userRoleType = $userRole ? $userRole->type : null;
@@ -169,6 +174,10 @@ class RoleController extends Controller
         try {
             if ($role->users()->exists()) {
                 return $this->errorResponse('Peran tidak dapat dihapus karena masih digunakan oleh pengguna.', 422);
+            }
+
+            if ($role->name === 'super-admin') {
+                return $this->errorResponse('Peran super-admin tidak dapat dihapus.', 422);
             }
 
             DB::beginTransaction();

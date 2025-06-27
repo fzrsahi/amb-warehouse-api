@@ -3,9 +3,66 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\PaginationRequest;
+use App\Traits\ApiResponse;
+use App\Traits\PaginationTrait;
+use Illuminate\Support\Facades\Log;
+use App\Models\Location;
+use App\Http\Requests\StoreLocationRequest;
+use App\Http\Requests\UpdateLocationRequest;
+
 
 class LocationController extends Controller
 {
-    //
+    use ApiResponse, PaginationTrait;
+
+    public function index(PaginationRequest $request)
+    {
+        try {
+            $query = Location::query();
+            $result = $this->handlePaginationWithFormat($query, $request, ["id", "name", "code", "price"]);
+
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, message: 'Daftar lokasi berhasil diambil.', code: 200, pagination: $pagination);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil daftar lokasi: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil daftar lokasi.');
+        }
+    }
+
+    public function store(StoreLocationRequest $request)
+    {
+        try {
+            $location = Location::create($request->all());
+            return $this->successResponse(null, message: 'Lokasi berhasil dibuat.', code: 201);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat membuat lokasi: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat membuat lokasi.');
+        }
+    }
+
+
+    public function update(UpdateLocationRequest $request, Location $location)
+    {
+        try {
+            $location->update($request->all());
+            return $this->successResponse(null, message: 'Lokasi berhasil diubah.', code: 200);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengubah lokasi: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengubah lokasi.');
+        }
+    }
+
+    public function destroy(Location $location)
+    {
+        try {
+            $location->delete();
+            return $this->successResponse(null, message: 'Lokasi berhasil dihapus.', code: 200);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat menghapus lokasi: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat menghapus lokasi.');
+        }
+    }
 }
