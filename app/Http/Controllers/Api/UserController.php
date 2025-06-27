@@ -68,6 +68,39 @@ class UserController extends Controller
         }
     }
 
+    public function show(User $user)
+    {
+        try {
+            $currentUser = request()->user();
+            $currentUserRole = $currentUser->roles->first();
+            $currentUserRoleType = $currentUserRole ? $currentUserRole->type : null;
+
+            if ($currentUser->hasRole('super-admin')) {
+            } elseif ($currentUserRoleType === 'warehouse') {
+                $targetUserRole = $user->roles->first();
+                if (!$targetUserRole || $targetUserRole->type !== 'warehouse') {
+                    return $this->forbiddenResponse('Anda hanya dapat melihat user warehouse');
+                }
+            } elseif ($currentUserRoleType === 'company') {
+                if ($user->company_id !== $currentUser->company_id) {
+                    return $this->forbiddenResponse('Anda hanya dapat melihat user dari perusahaan Anda sendiri');
+                }
+            } else {
+                return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat user');
+            }
+
+            $user->load(['roles:id,name,type', 'company:id,name']);
+            if ($user->roles) {
+                $user->roles->makeHidden('pivot');
+            }
+
+            return $this->successResponse($user, 'Detail user berhasil diambil');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil detail user: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil detail user');
+        }
+    }
+
     public function store(UserStoreRequest $request)
     {
         try {

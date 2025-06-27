@@ -32,6 +32,16 @@ class AirlineController extends Controller
         }
     }
 
+    public function show(Airline $airline)
+    {
+        try {
+            return $this->successResponse($airline, 'Data airline berhasil diambil', code: 200);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil data airline: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data airline');
+        }
+    }
+
     public function store(StoreAirlineRequest $request)
     {
         try {

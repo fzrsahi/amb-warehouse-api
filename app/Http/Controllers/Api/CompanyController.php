@@ -88,6 +88,24 @@ class CompanyController extends Controller
         }
     }
 
+    public function show(Company $company)
+    {
+        try {
+            $user = request()->user();
+
+            if ($user->hasRole('super-admin')) {
+            } elseif ($user->hasRole('warehouse-admin')) {
+            } elseif ($user->company_id !== $company->id) {
+                return $this->forbiddenResponse('Anda hanya dapat melihat perusahaan Anda sendiri');
+            }
+
+            return $this->successResponse($company, 'Data perusahaan berhasil diambil');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil data perusahaan: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data perusahaan');
+        }
+    }
+
     public function update(UpdateCompanyRequest $request, Company $company)
     {
         try {

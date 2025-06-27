@@ -23,12 +23,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/companies', [CompanyController::class, 'store'])->middleware('can:create company');
     Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all company');
     Route::get('/companies/my', [CompanyController::class, 'myCompany'])->middleware('can:view own company');
+    Route::get('/companies/{company}', [CompanyController::class, 'show'])->middleware('can:show company');
     Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('can:edit company');
     Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->middleware('can:delete company');
 
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all user');
+    Route::get('/users/{user}', [UserController::class, 'show'])->middleware('can:show user');
     Route::put('/users/{user}', [UserController::class, 'update'])->middleware('can:edit user');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('can:delete user');
 
@@ -42,12 +44,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/airlines', [AirlineController::class, 'index'])->middleware('can:view all airline');
+    Route::get('/airlines/{airline}', [AirlineController::class, 'show'])->middleware('can:show airline');
     Route::post('/airlines', [AirlineController::class, 'store'])->middleware('can:create airline');
     Route::put('/airlines/{airline}', [AirlineController::class, 'update'])->middleware('can:edit airline');
     Route::delete('/airlines/{airline}', [AirlineController::class, 'destroy'])->middleware('can:delete airline');
 
 
     Route::get('/locations', [LocationController::class, 'index'])->middleware('can:view all location');
+    Route::get('/locations/{location}', [LocationController::class, 'show'])->middleware('can:show location');
     Route::post('/locations', [LocationController::class, 'store'])->middleware('can:create location');
     Route::put('/locations/{location}', [LocationController::class, 'update'])->middleware('can:edit location');
     Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('can:delete location');

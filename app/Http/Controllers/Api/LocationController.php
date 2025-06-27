@@ -32,6 +32,16 @@ class LocationController extends Controller
         }
     }
 
+    public function show(Location $location)
+    {
+        try {
+            return $this->successResponse($location, 'Detail lokasi berhasil diambil', code: 200);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil detail lokasi: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil detail lokasi');
+        }
+    }
+
     public function store(StoreLocationRequest $request)
     {
         try {
