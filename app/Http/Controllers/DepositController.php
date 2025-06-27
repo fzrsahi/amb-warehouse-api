@@ -10,6 +10,7 @@ use App\Traits\PaginationTrait;
 use App\Models\Deposit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\VerifyDepositRequest;
 
 class DepositController extends Controller
 {
@@ -159,6 +160,38 @@ class DepositController extends Controller
             DB::rollBack();
             Log::error('Terjadi kesalahan saat memperbarui data deposit: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat memperbarui data deposit');
+        }
+    }
+
+    public function verify(VerifyDepositRequest $request, Deposit $deposit)
+    {
+        try {
+            DB::beginTransaction();
+            $user = request()->user();
+
+            $deposit->update([
+                'status' => $request->status,
+                'description' => $request->description,
+                'accepted_by_user_id' => $user->id,
+                'accepted_at' => now(),
+            ]);
+
+            $deposit->remarks()->create([
+                'user_id' => $user->id,
+                'model' => 'App\Models\Deposit',
+                'model_id' => $deposit->id,
+                'status' => $request->status,
+                'description' => $request->description,
+            ]);
+
+            DB::commit();
+
+            $statusMessage = $request->status === 'approve' ? 'disetujui' : 'ditolak';
+            return $this->successResponse(null, "Verifikasi deposit berhasil", code: 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Terjadi kesalahan saat memverifikasi deposit: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat memverifikasi deposit');
         }
     }
 }

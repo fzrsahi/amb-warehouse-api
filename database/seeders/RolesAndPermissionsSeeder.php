@@ -96,6 +96,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage deposit', 'guard_name' => 'web']);
+        Permission::create(['name' => 'verify deposit', 'guard_name' => 'web']);
         // Remarks
         Permission::create(['name' => 'view all remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'show remark', 'guard_name' => 'web']);
@@ -208,6 +209,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'create remark',
             'edit remark',
             'delete remark',
+            'verify deposit',
         ]);
 
         // 4. Role: Super Admin (Full Access)

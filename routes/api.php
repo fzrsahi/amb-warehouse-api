@@ -63,4 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deposits', [DepositController::class, 'store'])->middleware('can:create deposit');
     Route::put('/deposits/{deposit}', [DepositController::class, 'update'])->middleware('can:edit deposit');
     Route::delete('/deposits/{deposit}', [DepositController::class, 'destroy'])->middleware('can:delete deposit');
+
+    Route::post('/deposits/{deposit}/verify', [DepositController::class, 'verify'])->middleware('can:verify deposit');
 });
