@@ -79,6 +79,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view all roles',
             'view all permissions',
             'create user',
+            'view all users',
             'edit user',
             'view role',
             'edit role',

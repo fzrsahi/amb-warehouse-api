@@ -68,15 +68,11 @@ trait ApiResponse
      */
     protected function validationErrorResponse($errors, string $message = 'Validasi gagal'): JsonResponse
     {
-        // Ambil pesan error pertama dari array validasi
-        $firstMessage = $message;
-        if (is_array($errors) && !empty($errors)) {
-            $firstError = collect($errors)->first();
-            if (is_array($firstError) && !empty($firstError)) {
-                $firstMessage = $firstError[0] ?? $message;
-            }
-        }
-        return $this->errorResponse($firstMessage, 422);
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+            'data'    => $errors,
+        ], 422);
     }
 
     /**

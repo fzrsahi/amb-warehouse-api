@@ -31,7 +31,8 @@ class UpdateRoleRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:roles,name,' . $this->route('role')->id,
             'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id'
+            'permissions.*' => 'exists:permissions,id',
+            'type' => 'in:warehouse,company,super-admin'
         ];
     }
 
@@ -44,13 +45,22 @@ class UpdateRoleRequest extends FormRequest
             'name.unique' => 'Nama peran sudah terdaftar',
             'permissions.array' => 'Permissions harus berupa array',
             'permissions.*.exists' => 'Permission tidak ditemukan',
+            'type.in' => 'Tipe peran harus berupa warehouse, company, atau super-admin',
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
+        $errors = $validator->errors()->toArray();
+        $firstError = collect($errors)->first();
+        $errorMessage = $firstError[0] ?? 'Validasi gagal';
+
         throw new HttpResponseException(
-            $this->validationErrorResponse($validator->errors()->toArray(), 'Validasi gagal')
+            response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'data' => null,
+            ], 422)
         );
     }
 }

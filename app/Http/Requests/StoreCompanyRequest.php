@@ -72,8 +72,16 @@ class StoreCompanyRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
+        $errors = $validator->errors()->toArray();
+        $firstError = collect($errors)->first();
+        $errorMessage = $firstError[0] ?? 'Validasi gagal';
+
         throw new HttpResponseException(
-            $this->validationErrorResponse($validator->errors()->toArray(), 'Validasi gagal')
+            response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'data' => null,
+            ], 422)
         );
     }
 }

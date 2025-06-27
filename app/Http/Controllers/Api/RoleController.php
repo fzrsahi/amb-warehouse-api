@@ -7,7 +7,6 @@ use Spatie\Permission\Models\Role;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
 use App\Http\Requests\PaginationRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreRoleRequest;
@@ -66,15 +65,20 @@ class RoleController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $user = $request->user();
             $userRole = $user->roles->first();
             $userRoleType = $userRole ? $userRole->type : null;
 
+            if ($user->hasRole('super-admin')) {
+                $roleType = $request->type;
+            } else {
+                $roleType = $userRoleType;
+            }
+
             $role = Role::create([
                 'name' => $request->name,
                 'guard_name' => 'web',
-                'type' => $userRoleType
+                'type' => $roleType
             ]);
 
             if ($request->has('permissions')) {
@@ -122,9 +126,22 @@ class RoleController extends Controller
             $userRole = $user->roles->first();
             $userRoleType = $userRole ? $userRole->type : null;
 
+            if (!$user->hasRole('super-admin')) {
+                if ($role->type !== $userRoleType) {
+                    DB::rollBack();
+                    return $this->forbiddenResponse('Anda tidak memiliki akses untuk mengubah peran dengan tipe ini.');
+                }
+            }
+
+            if ($user->hasRole('super-admin')) {
+                $roleType = $request->type;
+            } else {
+                $roleType = $userRoleType;
+            }
+
             $role->update([
                 'name' => $request->name,
-                'type' => $userRoleType
+                'type' => $roleType
             ]);
 
             if ($request->has('permissions')) {

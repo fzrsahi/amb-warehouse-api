@@ -16,8 +16,6 @@ class UserStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Otorisasi akan kita tangani di controller menggunakan middleware/gate Spatie.
-        // Jadi, di sini kita set ke true.
         return true;
     }
 
@@ -32,7 +30,8 @@ class UserStoreRequest extends FormRequest
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|max:255|unique:users,email',
             'password'  => 'required|string|min:8|confirmed',
-            'company_id' => 'required|exists:companies,id',
+            'role_id'   => 'required|exists:roles,id',
+            'company_id' => 'nullable|exists:companies,id',
         ];
     }
 
@@ -50,15 +49,24 @@ class UserStoreRequest extends FormRequest
             'password.string' => 'Password harus berupa teks',
             'password.min' => 'Password minimal 8 karakter',
             'password.confirmed' => 'Konfirmasi password tidak sesuai',
-            'company_id.required' => 'Perusahaan wajib diisi',
+            'role_id.required' => 'Role wajib diisi',
+            'role_id.exists' => 'Role tidak ditemukan',
             'company_id.exists' => 'Perusahaan tidak ditemukan',
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
+        $errors = $validator->errors()->toArray();
+        $firstError = collect($errors)->first();
+        $errorMessage = $firstError[0] ?? 'Validasi gagal';
+
         throw new HttpResponseException(
-            $this->validationErrorResponse($validator->errors()->toArray(), 'Validasi gagal')
+            response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'data' => null,
+            ], 422)
         );
     }
 }
