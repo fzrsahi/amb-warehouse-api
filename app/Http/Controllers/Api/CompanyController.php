@@ -86,7 +86,11 @@ class CompanyController extends Controller
                 return $this->notFoundResponse('Perusahaan tidak ditemukan');
             }
 
-            $company->load(['deposits.remarks.user:id,name,email']);
+            $company->load([
+                'deposits.remarks.user:id,name,email',
+                'deposits.createdBy:id,name',
+                'deposits.acceptedBy:id,name'
+            ]);
 
             $totalBalance = $company->deposits()
                 ->where('status', 'approve')
