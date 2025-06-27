@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('accepted_by_user_id')->nullable()->constrained('users');
             $table->decimal('nominal', 15, 2);
             $table->foreignId('company_id')->constrained('companies');
-            $table->string('status')->default('pending');
+            $table->string('status')->default('submit');
+            $table->string('photo')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
         });

@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Deposit extends Model
 {
+
+    protected $fillable = [
+        'deposit_at',
+        'created_by_user_id',
+        'accepted_by_user_id',
+        'nominal',
+        'company_id',
+        'status',
+        'accepted_at',
+    ];
+
     public function company() {
         return $this->belongsTo(Company::class);
     }

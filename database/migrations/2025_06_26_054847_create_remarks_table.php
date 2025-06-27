@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('remarks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('deposit_id')->constrained('deposits');
+            $table->string('model');
+            $table->foreignId('model_id')->constrained('deposits');
             $table->foreignId('user_id')->constrained('users');
-            $table->text('remark');
-            $table->string('model_id');
+            $table->text('description')->nullable();
+            $table->string('status'); // submit, approve, reject
             $table->timestamps();
         });
     }

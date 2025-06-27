@@ -24,6 +24,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create item', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit item', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage item', 'guard_name' => 'web']);
 
         // Invoices
         Permission::create(['name' => 'view all invoice', 'guard_name' => 'web']);
@@ -32,6 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create invoice', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit invoice', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage invoice', 'guard_name' => 'web']);
 
         // Invoice Items
         Permission::create(['name' => 'view all invoice_item', 'guard_name' => 'web']);
@@ -39,7 +41,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create invoice_item', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit invoice_item', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete invoice_item', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage invoice_item', 'guard_name' => 'web']);
         // Companies
         Permission::create(['name' => 'view all company', 'guard_name' => 'web']);
         Permission::create(['name' => 'view own company', 'guard_name' => 'web']);
@@ -47,6 +49,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create company', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit company', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete company', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage company', 'guard_name' => 'web']);
 
         // Users
         Permission::create(['name' => 'view all user', 'guard_name' => 'web']);
@@ -54,20 +57,16 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create user', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit user', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete user', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage user', 'guard_name' => 'web']);
         // Roles
         Permission::create(['name' => 'view all role', 'guard_name' => 'web']);
         Permission::create(['name' => 'show role', 'guard_name' => 'web']);
         Permission::create(['name' => 'create role', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit role', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete role', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage role', 'guard_name' => 'web']);
         // Permissions
         Permission::create(['name' => 'view all permission', 'guard_name' => 'web']);
-        Permission::create(['name' => 'show permission', 'guard_name' => 'web']);
-        Permission::create(['name' => 'create permission', 'guard_name' => 'web']);
-        Permission::create(['name' => 'edit permission', 'guard_name' => 'web']);
-        Permission::create(['name' => 'delete permission', 'guard_name' => 'web']);
 
         // Airlines
         Permission::create(['name' => 'view all airline', 'guard_name' => 'web']);
@@ -75,35 +74,35 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'create airline', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit airline', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete airline', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage airline', 'guard_name' => 'web']);
         // Locations
         Permission::create(['name' => 'view all location', 'guard_name' => 'web']);
         Permission::create(['name' => 'show location', 'guard_name' => 'web']);
         Permission::create(['name' => 'create location', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit location', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete location', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage location', 'guard_name' => 'web']);
         // Flights
         Permission::create(['name' => 'view all flight', 'guard_name' => 'web']);
         Permission::create(['name' => 'show flight', 'guard_name' => 'web']);
         Permission::create(['name' => 'create flight', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit flight', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete flight', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage flight', 'guard_name' => 'web']);
         // Deposits
         Permission::create(['name' => 'view all deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'show deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'create deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit deposit', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete deposit', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage deposit', 'guard_name' => 'web']);
         // Remarks
         Permission::create(['name' => 'view all remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'show remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'create remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete remark', 'guard_name' => 'web']);
-
+        Permission::create(['name' => 'manage remark', 'guard_name' => 'web']);
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
