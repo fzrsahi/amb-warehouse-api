@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
+    Route::put('/users/{user}', [UserController::class, 'update'])->middleware('can:edit user');
 
 
     Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
