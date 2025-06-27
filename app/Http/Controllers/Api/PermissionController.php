@@ -19,22 +19,36 @@ class PermissionController extends Controller
             $user = $request->user();
             $permissionsQuery = Permission::query();
 
+            $userRole = $user->roles->first();
+            $userRoleType = $userRole ? $userRole->type : null;
+
             if ($user->hasRole('super-admin')) {
                 $permissionsQuery = Permission::query();
-            } elseif ($user->hasRole('warehouse-admin')) {
+            } elseif ($userRoleType === 'warehouse') {
                 $permissionsQuery->where(function ($query) {
                     $query->where('name', 'like', '%item%')
                         ->orWhere('name', 'like', '%invoice%')
+                        ->orWhere('name', 'like', '%invoice_item%')
                         ->orWhere('name', 'like', '%deposit%')
                         ->orWhere('name', 'like', '%company%')
                         ->orWhere('name', 'like', '%user%')
-                        ->orWhere('name', 'like', '%role%');
+                        ->orWhere('name', 'like', '%role%')
+                        ->orWhere('name', 'like', '%permission%')
+                        ->orWhere('name', 'like', '%airline%')
+                        ->orWhere('name', 'like', '%location%')
+                        ->orWhere('name', 'like', '%flight%')
+                        ->orWhere('name', 'like', '%remark%');
                 });
-            } elseif ($user->hasRole('company-admin')) {
+            } elseif ($userRoleType === 'company') {
                 $permissionsQuery->where(function ($query) {
-                    $query->where('name', 'like', '%own%')
-                        ->orWhere('name', 'request deposit')
-                        ->orWhere('name', 'create user');
+                    $query->where('name', 'like', '%company%')
+                        ->orWhere('name', 'like', '%item%')
+                        ->orWhere('name', 'like', '%invoice%')
+                        ->orWhere('name', 'like', '%deposit%')
+                        ->orWhere('name', 'like', '%remark%')
+                        ->orWhere('name', 'like', '%user%')
+                        ->orWhere('name', 'like', '%role%')
+                        ->orWhere('name', 'like', '%permission%');
                 });
             } else {
                 $permissionsQuery->whereRaw('1 = 0');
