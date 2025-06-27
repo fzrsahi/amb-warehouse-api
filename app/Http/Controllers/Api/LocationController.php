@@ -20,7 +20,7 @@ class LocationController extends Controller
     {
         try {
             $query = Location::query();
-            $result = $this->handlePaginationWithFormat($query, $request, ["id", "name", "code", "price"]);
+            $result = $this->handlePaginationWithFormat($query, $request, ["id", "name", "code"]);
 
             $pagination = $result["pagination"] ?? null;
             $data = $result["data"] ?? $result;
