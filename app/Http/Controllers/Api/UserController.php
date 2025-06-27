@@ -226,4 +226,42 @@ class UserController extends Controller
             return $this->serverErrorResponse('Terjadi kesalahan saat memperbarui user');
         }
     }
+
+    public function destroy(User $user)
+    {
+        try {
+            DB::beginTransaction();
+
+            $currentUser = request()->user();
+            $currentUserRole = $currentUser->roles->first();
+            $currentUserRoleType = $currentUserRole ? $currentUserRole->type : null;
+
+            if ($currentUser->hasRole('super-admin')) {
+            } elseif ($currentUserRoleType === 'warehouse') {
+                $targetUserRole = $user->roles->first();
+                if (!$targetUserRole || $targetUserRole->type !== 'warehouse') {
+                    return $this->forbiddenResponse('Anda hanya dapat menghapus user warehouse');
+                }
+            } elseif ($currentUserRoleType === 'company') {
+                if ($user->company_id !== $currentUser->company_id) {
+                    return $this->forbiddenResponse('Anda hanya dapat menghapus user dari perusahaan Anda sendiri');
+                }
+            } else {
+                return $this->forbiddenResponse('Anda tidak memiliki akses untuk menghapus user');
+            }
+
+            if ($user->id === $currentUser->id) {
+                return $this->forbiddenResponse('Anda tidak dapat menghapus akun Anda sendiri');
+            }
+
+            $user->delete();
+
+            DB::commit();
+            return $this->successResponse(null, 'User berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat menghapus user: ' . $e->getMessage());
+            DB::rollBack();
+            return $this->serverErrorResponse('Terjadi kesalahan saat menghapus user');
+        }
+    }
 }

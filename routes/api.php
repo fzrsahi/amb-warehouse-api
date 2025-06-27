@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
     Route::get('/users', [UserController::class, 'index'])->middleware('can:view all users');
     Route::put('/users/{user}', [UserController::class, 'update'])->middleware('can:edit user');
-
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('can:delete user');
 
     Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view all roles');
     Route::post('/roles', [RoleController::class, 'store'])->middleware('can:create role');
