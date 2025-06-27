@@ -86,7 +86,16 @@ class CompanyController extends Controller
                 return $this->notFoundResponse('Perusahaan tidak ditemukan');
             }
 
-            return $this->successResponse($company, 'Data perusahaan berhasil diambil');
+            $company->load(['deposits.remarks.user:id,name,email']);
+
+            $totalBalance = $company->deposits()
+                ->where('status', 'approve')
+                ->sum('nominal');
+
+            $companyData = $company->toArray();
+            $companyData['total_balance'] = $totalBalance;
+
+            return $this->successResponse($companyData, 'Data perusahaan berhasil diambil');
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil data perusahaan: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data perusahaan');
