@@ -39,7 +39,7 @@ class RoleController extends Controller
                 $query->select('id', 'name');
             }]);
 
-            $result = $this->handlePaginationWithFormat($rolesQuery, $request, ["id", "name"]);
+            $result = $this->handlePaginationWithFormat($rolesQuery, $request, ["id", "name", "type"]);
 
             if (isset($result['data'])) {
                 foreach ($result['data'] as $role) {

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\AirlineController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,4 +38,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('can:delete role');
 
     Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view all permissions');
+
+
+    Route::get('/airlines', [AirlineController::class, 'index'])->middleware('can:view all airlines');
+    Route::post('/airlines', [AirlineController::class, 'store'])->middleware('can:create airline');
+    Route::put('/airlines/{airline}', [AirlineController::class, 'update'])->middleware('can:edit airline');
+    Route::delete('/airlines/{airline}', [AirlineController::class, 'destroy'])->middleware('can:delete airline');
 });

@@ -60,6 +60,12 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit permissions', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete permissions', 'guard_name' => 'web']);
 
+        // Airlines
+        Permission::create(['name' => 'view all airlines', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create airline', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit airline', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete airline', 'guard_name' => 'web']);
+
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
