@@ -185,7 +185,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'view all role',
             'show role',
             'view all permission',
-            'show permission',
             'view all airline',
             'show airline',
             'create airline',
