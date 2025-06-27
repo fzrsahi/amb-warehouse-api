@@ -38,6 +38,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'view all companies', 'guard_name' => 'web']); // Melihat semua perusahaan
         Permission::create(['name' => 'create company', 'guard_name' => 'web']); // Membuat perusahaan
         Permission::create(['name' => 'edit company', 'guard_name' => 'web']); // Mengedit perusahaan
+        Permission::create(['name' => 'delete company', 'guard_name' => 'web']); // Menghapus perusahaan
 
         // Users
         Permission::create(['name' => 'view all users', 'guard_name' => 'web']);
@@ -98,6 +99,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'approve deposit',
             'view all companies',
             'edit company',
+            'delete company',
             'view all users',
             'create user',
             'edit user',

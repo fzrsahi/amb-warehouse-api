@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
 use App\Http\Requests\PaginationRequest;
 use App\Models\Company;
 use App\Models\User;
@@ -62,6 +63,90 @@ class CompanyController extends Controller
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil data mitra: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data mitra');
+        }
+    }
+
+    public function myCompany()
+    {
+        try {
+            $user = request()->user();
+
+            if (!$user->company_id) {
+                return $this->notFoundResponse('Anda tidak terhubung dengan perusahaan manapun');
+            }
+
+            $company = Company::find($user->company_id);
+
+            if (!$company) {
+                return $this->notFoundResponse('Perusahaan tidak ditemukan');
+            }
+
+            return $this->successResponse($company, 'Data perusahaan berhasil diambil');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil data perusahaan: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data perusahaan');
+        }
+    }
+
+    public function update(UpdateCompanyRequest $request, Company $company)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = $request->user();
+
+            if ($user->hasRole('super-admin')) {
+            } elseif ($user->hasRole('warehouse-admin')) {
+            } elseif ($user->company_id !== $company->id) {
+                return $this->forbiddenResponse('Anda hanya dapat mengedit perusahaan Anda sendiri');
+            }
+
+            $company->update([
+                'name'    => $request->company_name,
+                'email'   => $request->company_email,
+                'phone'   => $request->company_phone,
+                'address' => $request->company_address,
+                'logo'    => $request->company_logo,
+            ]);
+
+            DB::commit();
+            return $this->successResponse(null, 'Perusahaan berhasil diperbarui');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat memperbarui perusahaan: ' . $e->getMessage());
+            DB::rollBack();
+            return $this->serverErrorResponse('Terjadi kesalahan saat memperbarui perusahaan');
+        }
+    }
+
+    public function destroy(Company $company)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = request()->user();
+
+            if ($user->hasRole('super-admin')) {
+            } elseif ($user->hasRole('warehouse-admin')) {
+            } else {
+                return $this->forbiddenResponse('Anda tidak memiliki akses untuk menghapus perusahaan');
+            }
+
+            if ($company->users()->exists()) {
+                return $this->errorResponse('Perusahaan tidak dapat dihapus karena masih memiliki user yang terhubung', 422);
+            }
+
+            if ($company->deposits()->exists() || $company->items()->exists() || $company->invoices()->exists()) {
+                return $this->errorResponse('Perusahaan tidak dapat dihapus karena masih memiliki data yang terhubung', 422);
+            }
+
+            $company->delete();
+
+            DB::commit();
+            return $this->successResponse(null, 'Perusahaan berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat menghapus perusahaan: ' . $e->getMessage());
+            DB::rollBack();
+            return $this->serverErrorResponse('Terjadi kesalahan saat menghapus perusahaan');
         }
     }
 }

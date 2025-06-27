@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all companies');
     Route::get('/companies/my', [CompanyController::class, 'myCompany'])->middleware('can:view own company');
     Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('can:edit company');
+    Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->middleware('can:delete company');
 
 
     Route::post('/users', [UserController::class, 'store'])->middleware('can:create user');
