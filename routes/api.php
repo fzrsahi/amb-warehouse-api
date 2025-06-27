@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\AirlineController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\DepositController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -55,4 +56,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/locations', [LocationController::class, 'store'])->middleware('can:create location');
     Route::put('/locations/{location}', [LocationController::class, 'update'])->middleware('can:edit location');
     Route::delete('/locations/{location}', [LocationController::class, 'destroy'])->middleware('can:delete location');
+
+
+    Route::get('/deposits', [DepositController::class, 'index'])->middleware('can:view all deposit');
+    Route::get('/deposits/{deposit}', [DepositController::class, 'show'])->middleware('can:show deposit');
+    Route::post('/deposits', [DepositController::class, 'store'])->middleware('can:create deposit');
+    Route::put('/deposits/{deposit}', [DepositController::class, 'update'])->middleware('can:edit deposit');
+    Route::delete('/deposits/{deposit}', [DepositController::class, 'destroy'])->middleware('can:delete deposit');
 });

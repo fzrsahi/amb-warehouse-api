@@ -33,12 +33,10 @@ class StoreCompanyRequest extends FormRequest
             'company_email'     => 'required|email|max:255|unique:companies,email',
             'company_phone'     => 'required|string|max:20|nullable',
             'company_address'   => 'required|string|nullable',
-            'company_logo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'company_logo'      => 'file|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'user_name'         => 'required|string|max:255',
             'user_email'        => 'required|email|max:255|unique:users,email',
             'user_password'     => 'required|string|min:8|confirmed',
-
-
         ];
     }
 
@@ -61,6 +59,7 @@ class StoreCompanyRequest extends FormRequest
             'company_logo.image' => 'File logo harus berupa gambar',
             'company_logo.mimes' => 'Format logo harus jpeg, png, jpg, gif, atau svg',
             'company_logo.max' => 'Ukuran logo maksimal 2MB',
+
             'user_name.required' => 'Nama user wajib diisi',
             'user_name.string' => 'Nama user harus berupa teks',
             'user_name.max' => 'Nama user maksimal 255 karakter',

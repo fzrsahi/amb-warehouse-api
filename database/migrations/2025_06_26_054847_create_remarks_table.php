@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('model_id')->constrained('deposits');
             $table->foreignId('user_id')->constrained('users');
             $table->text('description')->nullable();
-            $table->string('status'); // submit, approve, reject
+            $table->string('status')->default('submit'); // submit, approve, reject
             $table->timestamps();
         });
     }

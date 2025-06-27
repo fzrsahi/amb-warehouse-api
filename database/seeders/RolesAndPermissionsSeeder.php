@@ -146,6 +146,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete role',
             'create role',
             'view all permission',
+            'edit deposit',
+            'delete deposit',
+            'manage deposit',
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)

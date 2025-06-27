@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('nominal', 15, 2);
             $table->foreignId('company_id')->constrained('companies');
             $table->string('status')->default('submit');
-            $table->string('photo')->nullable();
+            $table->string('photo');
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
         });

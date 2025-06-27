@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Deposit extends Model
 {
-
     protected $fillable = [
         'deposit_at',
         'created_by_user_id',
@@ -15,6 +14,7 @@ class Deposit extends Model
         'company_id',
         'status',
         'accepted_at',
+        'photo',
     ];
 
     public function company() {
@@ -27,6 +27,6 @@ class Deposit extends Model
         return $this->belongsTo(User::class, 'accepted_by_user_id');
     }
     public function remarks() {
-        return $this->morphMany(Remark::class, 'model');
+        return $this->hasMany(Remark::class, 'model_id');
     }
 }

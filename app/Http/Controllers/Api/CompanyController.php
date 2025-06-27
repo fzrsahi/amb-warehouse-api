@@ -23,16 +23,21 @@ class CompanyController extends Controller
         try {
             DB::beginTransaction();
 
+            $logoPath = null;
+            if ($request->hasFile('company_logo')) {
+                $logo = $request->file('company_logo');
+                $logoName = time() . '.' . $logo->getClientOriginalExtension();
+                $logo->move(public_path('photos'), $logoName);
+                $logoPath = 'photos/' . $logoName;
+            }
+
             $company = Company::create([
                 'name'    => $request->company_name,
                 'email'   => $request->company_email,
                 'phone'   => $request->company_phone,
                 'address' => $request->company_address,
-                'logo'    => $request->company_logo,
+                'logo'    => $logoPath,
             ]);
-
-            Log::info('Company created: ' . $company->id);
-
             $user = User::create([
                 'name' => $request->user_name,
                 'email' => $request->user_email,
