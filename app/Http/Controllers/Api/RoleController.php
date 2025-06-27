@@ -27,7 +27,7 @@ class RoleController extends Controller
             $userRoleType = $userRole ? $userRole->type : null;
 
             if ($user->hasRole('super-admin')) {
-                $rolesQuery->whereIn('name', ['super-admin', 'warehouse-admin', 'company-admin', 'warehouse-staff']);
+                $rolesQuery->whereIn('type', ['warehouse', 'company', 'super-admin']);
             } elseif ($userRoleType === 'warehouse') {
                 $rolesQuery->where('type', 'warehouse');
             } elseif ($userRoleType === 'company') {
