@@ -27,8 +27,10 @@ class UpdateItemRequest extends FormRequest
             'commodity' => 'required|string|max:255',
             'qty' => 'required|integer|min:1',
             'gross_weight' => 'required|numeric|min:0',
-            'chargeable_weight' => 'required|numeric|min:0',
-            'status' => 'required|string',
+            'weight_calculation_method' => 'required|string|in:actual,volume',
+            'length' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
+            'width' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
+            'height' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
         ];
     }
 
@@ -44,8 +46,15 @@ class UpdateItemRequest extends FormRequest
             'qty.required' => 'Jumlah (Qty) wajib diisi.',
             'qty.integer' => 'Jumlah (Qty) harus berupa angka.',
             'gross_weight.required' => 'Berat kotor wajib diisi.',
-            'chargeable_weight.required' => 'Berat kena cas wajib diisi.',
-            'status.required' => 'Status wajib diisi.',
+            'weight_calculation_method.required' => 'Metode perhitungan berat wajib diisi.',
+            'weight_calculation_method.string' => 'Metode perhitungan berat harus berupa string.',
+            'weight_calculation_method.in' => 'Metode perhitungan berat harus berupa actual atau volume.',
+            'length.numeric' => 'Panjang harus berupa angka.',
+            'width.numeric' => 'Lebar harus berupa angka.',
+            'height.numeric' => 'Tinggi harus berupa angka.',
+            'length.required_if' => 'Panjang wajib diisi jika metode perhitungan berat adalah volume.',
+            'width.required_if' => 'Lebar wajib diisi jika metode perhitungan berat adalah volume.',
+            'height.required_if' => 'Tinggi wajib diisi jika metode perhitungan berat adalah volume.',
         ];
     }
 

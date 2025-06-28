@@ -183,6 +183,22 @@ class ItemController extends Controller
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk mengedit item ini');
             }
 
+            $gross_weight = (float) $data['gross_weight'];
+            $volume_weight = null;
+            $chargeable_weight = $gross_weight;
+
+            if ($data['weight_calculation_method'] === 'volume') {
+                $length = (float) $data['length'];
+                $width = (float) $data['width'];
+                $height = (float) $data['height'];
+
+                $volume_weight = ($length * $width * $height) / 5000;
+                $chargeable_weight = max($gross_weight, $volume_weight);
+            }
+
+            $data['volume_weight'] = $volume_weight;
+            $data['chargeable_weight'] = $chargeable_weight;
+
             $item->update($data);
 
             DB::commit();
