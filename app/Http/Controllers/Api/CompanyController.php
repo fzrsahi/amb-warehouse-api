@@ -89,15 +89,39 @@ class CompanyController extends Controller
             $company->load([
                 'deposits.remarks.user:id,name,email',
                 'deposits.createdBy:id,name',
-                'deposits.acceptedBy:id,name'
+                'deposits.acceptedBy:id,name',
+                'invoices.payments.createdBy:id,name',
+                'invoices.remarks.user:id,name,email',
+                'payments.invoice:id,invoice_number,total_amount'
             ]);
 
-            $totalBalance = $company->deposits()
-                ->where('status', 'approve')
-                ->sum('nominal');
+            // Hitung saldo
+            $totalDepositBalance = $company->getTotalDepositBalance();
+            $totalPayments = $company->getTotalPayments();
+            $remainingBalance = $company->getRemainingBalance();
+
+            // Ambil history pembayaran terbaru
+            $recentPayments = $company->payments()
+                ->with(['invoice:id,invoice_number,total_amount', 'createdBy:id,name'])
+                ->orderBy('paid_at', 'desc')
+                ->limit(10)
+                ->get();
+
+            // Ambil invoice terbaru
+            $recentInvoices = $company->invoices()
+                ->with(['payments', 'remarks.user:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get();
 
             $companyData = $company->toArray();
-            $companyData['total_balance'] = $totalBalance;
+            $companyData['balance_info'] = [
+                'total_deposit' => $totalDepositBalance,
+                'total_payments' => $totalPayments,
+                'remaining_balance' => $remainingBalance,
+            ];
+            $companyData['recent_payments'] = $recentPayments;
+            $companyData['recent_invoices'] = $recentInvoices;
 
             return $this->successResponse($companyData, 'Data perusahaan berhasil diambil');
         } catch (\Exception $e) {
@@ -183,6 +207,81 @@ class CompanyController extends Controller
             Log::error('Terjadi kesalahan saat menghapus perusahaan: ' . $e->getMessage());
             DB::rollBack();
             return $this->serverErrorResponse('Terjadi kesalahan saat menghapus perusahaan');
+        }
+    }
+
+    public function paymentHistory(PaginationRequest $request)
+    {
+        try {
+            $user = request()->user();
+
+            if (!$user->company_id) {
+                return $this->notFoundResponse('Anda tidak terhubung dengan perusahaan manapun');
+            }
+
+            $query = $user->company->payments()
+                ->with([
+                    'invoice:id,invoice_number,total_amount,issued_at',
+                    'createdBy:id,name,email'
+                ])
+                ->orderBy('paid_at', 'desc');
+
+            $result = $this->handlePaginationWithFormat($query, $request);
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, 'History pembayaran berhasil diambil', 200, $pagination);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil history pembayaran: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil history pembayaran');
+        }
+    }
+
+    public function balanceSummary()
+    {
+        try {
+            $user = request()->user();
+
+            if (!$user->company_id) {
+                return $this->notFoundResponse('Anda tidak terhubung dengan perusahaan manapun');
+            }
+
+            $company = $user->company;
+
+            // Hitung saldo
+            $totalDepositBalance = $company->getTotalDepositBalance();
+            $totalPayments = $company->getTotalPayments();
+            $remainingBalance = $company->getRemainingBalance();
+
+            // Statistik tambahan
+            $totalInvoices = $company->invoices()->count();
+            $paidInvoices = $company->invoices()->where('status', 'paid')->count();
+            $pendingInvoices = $company->invoices()->where('approval_status', 'pending')->count();
+            $rejectedInvoices = $company->invoices()->where('approval_status', 'rejected')->count();
+
+            $summary = [
+                'balance_info' => [
+                    'total_deposit' => $totalDepositBalance,
+                    'total_payments' => $totalPayments,
+                    'remaining_balance' => $remainingBalance,
+                ],
+                'invoice_stats' => [
+                    'total_invoices' => $totalInvoices,
+                    'paid_invoices' => $paidInvoices,
+                    'pending_invoices' => $pendingInvoices,
+                    'rejected_invoices' => $rejectedInvoices,
+                ],
+                'recent_activity' => [
+                    'last_payment' => $company->payments()->latest('paid_at')->first(),
+                    'last_invoice' => $company->invoices()->latest('created_at')->first(),
+                    'last_deposit' => $company->deposits()->latest('created_at')->first(),
+                ]
+            ];
+
+            return $this->successResponse($summary, 'Ringkasan saldo berhasil diambil');
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil ringkasan saldo: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil ringkasan saldo');
         }
     }
 }

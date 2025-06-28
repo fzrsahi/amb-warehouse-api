@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/companies', [CompanyController::class, 'store'])->middleware('can:create company');
     Route::get('/companies', [CompanyController::class, 'index'])->middleware('can:view all company');
     Route::get('/my-company', [CompanyController::class, 'myCompany'])->middleware('can:view own company');
+    Route::get('/my-company/payment-history', [CompanyController::class, 'paymentHistory'])->middleware('can:view own company');
+    Route::get('/my-company/balance-summary', [CompanyController::class, 'balanceSummary'])->middleware('can:view own company');
     Route::get('/companies/{company}', [CompanyController::class, 'show'])->middleware('can:show company');
     Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('can:edit company');
     Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->middleware('can:delete company');
@@ -87,4 +89,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('can:view all invoice');
     Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('can:create invoice');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->middleware('can:show invoice');
+    Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->middleware('can:edit invoice');
+    Route::post('/invoices/{invoice}/verify', [InvoiceController::class, 'verify'])->middleware('can:verify invoice');
 });

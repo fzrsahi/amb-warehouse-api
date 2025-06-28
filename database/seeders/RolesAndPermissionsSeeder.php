@@ -36,6 +36,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit invoice', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete invoice', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage invoice', 'guard_name' => 'web']);
+        Permission::create(['name' => 'verify invoice', 'guard_name' => 'web']);
 
         // Invoice Items
         Permission::create(['name' => 'view all invoice_item', 'guard_name' => 'web']);
@@ -134,6 +135,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view all invoice',
             'view own invoice',
             'show invoice',
+            'verify invoice',
             'view all deposit',
             'show deposit',
             'create deposit',
@@ -153,6 +155,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit deposit',
             'delete deposit',
             'manage deposit',
+            'create item',
+            'edit item',
+            'delete item',
+            'view all invoice',
+            'view own invoice',
+            'show invoice',
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)

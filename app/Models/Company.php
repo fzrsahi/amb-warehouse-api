@@ -30,4 +30,45 @@ class Company extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Hitung total saldo deposit yang disetujui
+     */
+    public function getTotalDepositBalance()
+    {
+        return $this->deposits()
+            ->where('status', 'approve')
+            ->sum('nominal');
+    }
+
+    /**
+     * Hitung total pembayaran yang sudah dilakukan
+     */
+    public function getTotalPayments()
+    {
+        return $this->payments()
+            ->where('status', 'completed')
+            ->sum('amount');
+    }
+
+    /**
+     * Hitung sisa saldo (deposit - pembayaran)
+     */
+    public function getRemainingBalance()
+    {
+        return $this->getTotalDepositBalance() - $this->getTotalPayments();
+    }
+
+    /**
+     * Cek apakah saldo mencukupi untuk pembayaran
+     */
+    public function hasSufficientBalance($amount)
+    {
+        return $this->getRemainingBalance() >= $amount;
+    }
 }

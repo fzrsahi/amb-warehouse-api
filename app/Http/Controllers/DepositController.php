@@ -39,7 +39,24 @@ class DepositController extends Controller
             $pagination = $result["pagination"] ?? null;
             $data = $result["data"] ?? $result;
 
-            return $this->successResponse($data, 'Data deposit berhasil diambil', code: 200, pagination: $pagination);
+            // Tambahkan informasi saldo jika user adalah company
+            if ($user->company_id) {
+                $company = $user->company;
+                $balanceInfo = [
+                    'total_deposit' => $company->getTotalDepositBalance(),
+                    'total_payments' => $company->getTotalPayments(),
+                    'remaining_balance' => $company->getRemainingBalance(),
+                ];
+
+                $responseData = [
+                    'deposits' => $data,
+                    'balance_info' => $balanceInfo,
+                ];
+            } else {
+                $responseData = $data;
+            }
+
+            return $this->successResponse($responseData, 'Data deposit berhasil diambil', code: 200, pagination: $pagination);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil data deposit: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data deposit');
@@ -106,12 +123,25 @@ class DepositController extends Controller
                 'acceptedBy:id,name,email',
                 'company:id,name,email,phone,address',
                 'remarks' => function ($query) {
-                    $query->with('user:id,name,email')
+                    $query->where('model', 'App\Models\Deposit')
+                        ->with('user:id,name,email')
                         ->orderBy('created_at', 'desc');
                 }
             ]);
 
-            return $this->successResponse($deposit, 'Data deposit berhasil diambil', code: 200);
+            $responseData = $deposit->toArray();
+
+            // Tambahkan informasi saldo jika user adalah company
+            if ($user->company_id && $user->company_id === $deposit->company_id) {
+                $company = $user->company;
+                $responseData['balance_info'] = [
+                    'total_deposit' => $company->getTotalDepositBalance(),
+                    'total_payments' => $company->getTotalPayments(),
+                    'remaining_balance' => $company->getRemainingBalance(),
+                ];
+            }
+
+            return $this->successResponse($responseData, 'Data deposit berhasil diambil', code: 200);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat mengambil data deposit: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data deposit');
@@ -121,6 +151,7 @@ class DepositController extends Controller
     public function update(UpdateDepositRequest $request, Deposit $deposit)
     {
         try {
+            DB::beginTransaction();
             $user = request()->user();
 
             if ($user->hasRole('super-admin')) {
@@ -129,7 +160,9 @@ class DepositController extends Controller
                 return $this->forbiddenResponse('Anda hanya dapat mengubah deposit milik perusahaan Anda sendiri');
             }
 
-            DB::beginTransaction();
+            if ($deposit->status === 'approve') {
+                return $this->errorResponse('Deposit yang sudah disetujui tidak dapat diedit', 403);
+            }
 
             $photoPath = $deposit->photo;
 
@@ -142,8 +175,11 @@ class DepositController extends Controller
 
             $updateData = [];
 
-            if ($request->has('nominal')) {
-                $updateData['nominal'] = $request->nominal;
+            // Get all input data from request instead of just validated data
+            $allInput = $request->all();
+
+            if (isset($allInput['nominal']) && !is_null($allInput['nominal']) && $allInput['nominal'] !== '') {
+                $updateData['nominal'] = $allInput['nominal'];
             }
 
             if ($photoPath !== $deposit->photo) {
@@ -151,7 +187,15 @@ class DepositController extends Controller
             }
 
             if (!empty($updateData)) {
+                $updateData['status'] = 'submit';
                 $deposit->update($updateData);
+
+                $deposit->remarks()->create([
+                    'user_id' => $user->id,
+                    'model' => 'App\Models\Deposit',
+                    'model_id' => $deposit->id,
+                    'status' => 'submit',
+                ]);
             }
 
             DB::commit();
@@ -187,7 +231,21 @@ class DepositController extends Controller
             DB::commit();
 
             $statusMessage = $request->status === 'approve' ? 'disetujui' : 'ditolak';
-            return $this->successResponse(null, "Verifikasi deposit berhasil", code: 200);
+
+            // Tambahkan informasi saldo jika deposit disetujui
+            $responseData = null;
+            if ($request->status === 'approve') {
+                $company = $deposit->company;
+                $responseData = [
+                    'balance_info' => [
+                        'total_deposit' => $company->getTotalDepositBalance(),
+                        'total_payments' => $company->getTotalPayments(),
+                        'remaining_balance' => $company->getRemainingBalance(),
+                    ]
+                ];
+            }
+
+            return $this->successResponse($responseData, "Verifikasi deposit berhasil", code: 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Terjadi kesalahan saat memverifikasi deposit: ' . $e->getMessage());

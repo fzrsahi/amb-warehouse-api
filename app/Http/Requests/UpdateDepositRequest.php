@@ -24,8 +24,8 @@ class UpdateDepositRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nominal' => 'sometimes|numeric|min:10000',
-            'photo' => 'sometimes|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'nominal' => 'required|numeric|min:10000',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 
@@ -37,6 +37,7 @@ class UpdateDepositRequest extends FormRequest
             'photo.file' => 'Foto deposit harus berupa file',
             'photo.mimes' => 'Foto deposit harus berupa gambar',
             'photo.max' => 'Foto deposit maksimal 2MB',
+            'nominal.required' => 'Nominal deposit harus diisi',
         ];
     }
 

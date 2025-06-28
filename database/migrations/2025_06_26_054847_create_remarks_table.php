@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('remarks', function (Blueprint $table) {
             $table->id();
             $table->string('model');
-            $table->foreignId('model_id')->constrained('deposits');
+            $table->unsignedBigInteger('model_id');
             $table->foreignId('user_id')->constrained('users');
             $table->text('description')->nullable();
             $table->string('status')->default('submit'); // submit, approve, reject
             $table->timestamps();
+
+            // Index untuk performa query
+            $table->index(['model', 'model_id']);
         });
     }
 

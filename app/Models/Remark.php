@@ -23,4 +23,15 @@ class Remark extends Model
     {
         return $this->belongsTo(Deposit::class, 'model_id');
     }
+
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'model_id');
+    }
+
+    // Polymorphic relationship
+    public function remarkable()
+    {
+        return $this->morphTo('model', 'model', 'model_id');
+    }
 }

@@ -41,6 +41,15 @@ return new class extends Migration
             // Status pembayaran invoice
             $table->enum('status', ['draft', 'unpaid', 'paid', 'void'])->default('unpaid');
 
+            // Status approval invoice
+            $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending');
+
+            // Kolom untuk approval
+            $table->foreignId('approved_by_user_id')->nullable()->constrained('users')->comment('ID User yang menyetujui invoice.');
+            $table->timestamp('approved_at')->nullable()->comment('Waktu invoice disetujui.');
+            $table->foreignId('rejected_by_user_id')->nullable()->constrained('users')->comment('ID User yang menolak invoice.');
+            $table->timestamp('rejected_at')->nullable()->comment('Waktu invoice ditolak.');
+
             // Sesuai dengan tanggal di kanan bawah -> 05 June 2025
             $table->date('issued_at')->comment('Tanggal invoice diterbitkan.');
             $table->timestamp('paid_at')->nullable()->comment('Tanggal invoice dibayar.');
