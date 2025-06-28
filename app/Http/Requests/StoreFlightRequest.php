@@ -33,8 +33,8 @@ class StoreFlightRequest extends FormRequest
             'destination_id' => 'required|exists:locations,id',
             'airline_id' => 'required|exists:airlines,id',
             'flight_date' => 'required|date_format:Y-m-d',
-            'departure_at' => 'required|date_format:H:i',
-            'arrival_at' => 'nullable|date_format:H:i',
+            'departure_at' => 'required|date_format:Y-m-d H:i',
+            'arrival_at' => 'nullable|date_format:Y-m-d H:i',
         ];
     }
 
@@ -50,8 +50,8 @@ class StoreFlightRequest extends FormRequest
             'flight_date.required' => 'Tanggal penerbangan wajib diisi',
             'flight_date.date_format' => 'Format tanggal penerbangan harus YYYY-MM-DD',
             'departure_at.required' => 'Waktu keberangkatan wajib diisi',
-            'departure_at.date_format' => 'Format waktu keberangkatan harus HH:MM',
-            'arrival_at.date_format' => 'Format waktu kedatangan harus HH:MM',
+            'departure_at.date_format' => 'Format waktu keberangkatan harus YYYY-MM-DD HH:MM',
+            'arrival_at.date_format' => 'Format waktu kedatangan harus YYYY-MM-DD HH:MM',
         ];
     }
 

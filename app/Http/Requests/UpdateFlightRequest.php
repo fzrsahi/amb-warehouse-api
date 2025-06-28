@@ -33,8 +33,8 @@ class UpdateFlightRequest extends FormRequest
             'destination_id' => 'sometimes|exists:locations,id',
             'airline_id' => 'sometimes|exists:airlines,id',
             'flight_date' => 'sometimes|date_format:Y-m-d',
-            'departure_at' => 'sometimes|date_format:H:i',
-            'arrival_at' => 'nullable|date_format:H:i',
+            'departure_at' => 'sometimes|date_format:Y-m-d H:i',
+            'arrival_at' => 'nullable|date_format:Y-m-d H:i',
         ];
     }
 
@@ -45,8 +45,8 @@ class UpdateFlightRequest extends FormRequest
             'destination_id.exists' => 'Lokasi tujuan tidak valid',
             'airline_id.exists' => 'Maskapai tidak valid',
             'flight_date.date_format' => 'Format tanggal penerbangan harus YYYY-MM-DD',
-            'departure_at.date_format' => 'Format waktu keberangkatan harus HH:MM',
-            'arrival_at.date_format' => 'Format waktu kedatangan harus HH:MM',
+            'departure_at.date_format' => 'Format waktu keberangkatan harus YYYY-MM-DD HH:MM',
+            'arrival_at.date_format' => 'Format waktu kedatangan harus YYYY-MM-DD HH:MM',
         ];
     }
 

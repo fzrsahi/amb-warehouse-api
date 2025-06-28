@@ -47,15 +47,13 @@ class FlightController extends Controller
     {
         try {
             $data = $request->all();
-
             $origin = Location::find($data['origin_id']);
             if ($origin && ($origin->code === 'GTO' || $origin->code === 'gto')) {
                 $data['status'] = 'outgoing';
             } else {
                 $data['status'] = 'incoming';
             }
-
-            $flight = Flight::create($data);
+            Flight::create($data);
             return $this->successResponse(null, 'Flight berhasil dibuat', code: 201);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat membuat data flight: ' . $e->getMessage());
@@ -67,7 +65,6 @@ class FlightController extends Controller
     {
         try {
             $data = $request->all();
-
             if (isset($data['origin_id'])) {
                 $origin = Location::find($data['origin_id']);
                 if ($origin && ($origin->code === 'GTO' || $origin->code === 'gto')) {
@@ -76,9 +73,7 @@ class FlightController extends Controller
                     $data['status'] = 'incoming';
                 }
             }
-
             $flight->update($data);
-
             return $this->successResponse(null, 'Flight berhasil diperbarui', code: 200);
         } catch (\Exception $e) {
             Log::error('Terjadi kesalahan saat memperbarui data flight: ' . $e->getMessage());

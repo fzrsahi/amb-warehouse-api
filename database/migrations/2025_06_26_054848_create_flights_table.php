@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('airline_id')->constrained('airlines');
             $table->string('status'); // incoming, outgoing
             $table->date('flight_date')->default(now());
-            $table->time('departure_at')->nullable();
-            $table->time('arrival_at')->nullable();
+            $table->dateTime('departure_at')->nullable();
+            $table->dateTime('arrival_at')->nullable();
             $table->timestamps();
         });
     }
