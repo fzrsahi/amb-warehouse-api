@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\AirlineController;
+use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\DepositController;
 
@@ -65,4 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/deposits/{deposit}', [DepositController::class, 'destroy'])->middleware('can:delete deposit');
 
     Route::post('/deposits/{deposit}/verify', [DepositController::class, 'verify'])->middleware('can:verify deposit');
+
+    Route::get('/flights', [FlightController::class, 'index'])->middleware('can:view all flight');
+    Route::post('/flights', [FlightController::class, 'store'])->middleware('can:create flight');
 });

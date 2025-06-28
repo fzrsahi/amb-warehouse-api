@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Traits\PaginationTrait;
+use App\Models\Flight;
+use App\Http\Requests\PaginationRequest;
+use App\Traits\ApiResponse;
+use App\Http\Requests\StoreFlightRequest;
+use App\Models\Location;
+use Illuminate\Support\Facades\Log;
+
+class FlightController extends Controller
+{
+    use ApiResponse, PaginationTrait;
+
+    public function index(PaginationRequest $request)
+    {
+        try {
+            $query = Flight::with(['origin:id,name,code', 'destination:id,name,code', 'airline:id,name,code']);
+            $result = $this->handlePaginationWithFormat($query, $request);
+
+            $pagination = $result["pagination"] ?? null;
+            $data = $result["data"] ?? $result;
+
+            return $this->successResponse($data, 'Flight berhasil diambil', code: 200, pagination: $pagination);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengambil data flight: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data flight');
+        }
+    }
+
+    public function store(StoreFlightRequest $request)
+    {
+        try {
+            $data = $request->all();
+
+            $origin = Location::find($data['origin_id']);
+            if ($origin && ($origin->code === 'GTO' || $origin->code === 'gto')) {
+                $data['status'] = 'outgoing';
+            } else {
+                $data['status'] = 'incoming';
+            }
+
+            $flight = Flight::create($data);
+            return $this->successResponse($flight, 'Flight berhasil dibuat', code: 201);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat membuat data flight: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat membuat data flight');
+        }
+    }
+}
