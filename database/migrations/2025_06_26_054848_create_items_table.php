@@ -60,6 +60,7 @@ return new class extends Migration
 
             $table->timestamp('in_at')->nullable()->comment('Waktu barang masuk.');
             $table->timestamp('out_at')->nullable()->comment('Waktu barang keluar.');
+            $table->foreignId('out_by_user_id')->nullable()->constrained('users')->comment('ID Petugas yang mengeluarkan barang.');
 
             $table->timestamps();
         });

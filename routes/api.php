@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\DepositController;
 use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\InvoiceController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -81,4 +82,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/items/{item}', [ItemController::class, 'update'])->middleware('can:edit item');
     Route::delete('/items/{item}', [ItemController::class, 'destroy'])->middleware('can:delete item');
     Route::post('/items/{item}/verify', [ItemController::class, 'verify'])->middleware('can:verify item');
+    Route::post('/items/out', [ItemController::class, 'out'])->middleware('can:out item');
+
+    Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('can:view all invoice');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('can:create invoice');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->middleware('can:show invoice');
 });

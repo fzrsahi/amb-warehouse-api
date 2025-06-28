@@ -26,6 +26,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete item', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage item', 'guard_name' => 'web']);
         Permission::create(['name' => 'verify item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'out item', 'guard_name' => 'web']);
 
         // Invoices
         Permission::create(['name' => 'view all invoice', 'guard_name' => 'web']);
@@ -114,6 +115,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'show item',
             'create item',
             'edit item',
+            'out item',
             'view all flight',
             'show flight',
             'view all location',
@@ -162,6 +164,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'create item',
             'edit item',
             'delete item',
+            'out item',
             'view all invoice',
             'view own invoice',
             'show invoice',

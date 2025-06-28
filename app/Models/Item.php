@@ -26,6 +26,7 @@ class Item extends Model
         'status',
         'created_by_user_id',
         'accepted_by_user_id',
+        'out_by_user_id',
         'accepted_at',
         'in_at',
         'out_at',
@@ -52,6 +53,11 @@ class Item extends Model
     public function acceptedBy()
     {
         return $this->belongsTo(User::class, 'accepted_by_user_id');
+    }
+
+    public function outBy()
+    {
+        return $this->belongsTo(User::class, 'out_by_user_id');
     }
 
     public function invoices()

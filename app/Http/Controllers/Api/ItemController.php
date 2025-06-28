@@ -8,6 +8,7 @@ use App\Models\Flight;
 use App\Http\Requests\PaginationRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
+use App\Http\Requests\OutItemRequest;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
 use Illuminate\Support\Facades\DB;
@@ -133,7 +134,7 @@ class ItemController extends Controller
                 return $this->forbiddenResponse();
             }
 
-            $item->load(['company:id,name', 'flight.origin:id,code', 'flight.destination:id,code', 'createdBy:id,name', 'acceptedBy:id,name']);
+            $item->load(['company:id,name', 'flight.origin:id,code', 'flight.destination:id,code', 'createdBy:id,name', 'acceptedBy:id,name', 'outBy:id,name']);
             return $this->successResponse($item, 'Detail barang berhasil diambil');
         } catch (\Exception $e) {
             Log::error('Gagal mengambil detail barang: ' . $e->getMessage());
@@ -234,6 +235,66 @@ class ItemController extends Controller
             DB::rollBack();
             Log::error('Gagal menghapus barang: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat menghapus barang');
+        }
+    }
+
+    public function out(OutItemRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $user = $request->user();
+            $userRoleType = $user->roles->first()->type ?? null;
+
+            // Check if user has permission to release items
+            if (!($user->hasRole('super-admin') || $userRoleType === 'warehouse')) {
+                return $this->forbiddenResponse('Anda tidak memiliki akses untuk mengeluarkan barang.');
+            }
+
+            $itemIds = $request->validated()['item_ids'];
+            $items = Item::whereIn('id', $itemIds)->get();
+
+            if ($items->count() !== count($itemIds)) {
+                return $this->errorResponse('Beberapa barang tidak ditemukan.', 422);
+            }
+
+            $successCount = 0;
+            $failedItems = [];
+
+            foreach ($items as $item) {
+                if ($item->status !== 'at_origin_warehouse') {
+                    $failedItems[] = [
+                        'id' => $item->id,
+                        'awb' => $item->awb,
+                        'reason' => 'Barang tidak dalam status di gudang asal.'
+                    ];
+                    continue;
+                }
+
+                $item->update([
+                    'status' => 'out_from_origin_warehouse',
+                    'out_at' => now(),
+                    'out_by_user_id' => $user->id,
+                ]);
+
+                $successCount++;
+            }
+
+            DB::commit();
+
+            $message = "Berhasil mengeluarkan {$successCount} barang dari gudang asal.";
+            if (count($failedItems) > 0) {
+                $message .= " " . count($failedItems) . " barang gagal dikeluarkan.";
+            }
+
+            return $this->successResponse([
+                'success_count' => $successCount,
+                'failed_items' => $failedItems,
+                'total_items' => count($itemIds)
+            ], $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal mengeluarkan barang: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengeluarkan barang');
         }
     }
 }
