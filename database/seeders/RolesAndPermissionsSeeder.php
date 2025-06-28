@@ -214,6 +214,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // 4. Role: Super Admin (Full Access)
         $superAdminRole = Role::create(['name' => 'super-admin', 'guard_name' => 'web', 'type' => 'super-admin']);
-        $superAdminRole->givePermissionTo(Permission::all());
+        $superAdminRole->givePermissionTo(Permission::where('name', '!=', 'view own company')->get());
     }
 }
