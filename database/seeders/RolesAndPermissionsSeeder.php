@@ -25,6 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit item', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete item', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage item', 'guard_name' => 'web']);
+        Permission::create(['name' => 'verify item', 'guard_name' => 'web']);
 
         // Invoices
         Permission::create(['name' => 'view all invoice', 'guard_name' => 'web']);
@@ -210,6 +211,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit remark',
             'delete remark',
             'verify deposit',
+            'verify item',
         ]);
 
         // 4. Role: Super Admin (Full Access)

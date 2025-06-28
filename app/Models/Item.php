@@ -2,20 +2,60 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
-    public function company() {
+    use HasFactory;
+
+    protected $fillable = [
+        'code',
+        'awb',
+        'company_id',
+        'flight_id',
+        'commodity',
+        'qty',
+        'gross_weight',
+        'chargeable_weight',
+        'volume_weight',
+        'length',
+        'width',
+        'height',
+        'weight_calculation_method',
+        'status',
+        'created_by_user_id',
+        'accepted_by_user_id',
+        'accepted_at',
+        'in_at',
+        'out_at',
+    ];
+
+
+    public function company()
+    {
         return $this->belongsTo(Company::class);
     }
-    public function flight() {
+
+
+    public function flight()
+    {
         return $this->belongsTo(Flight::class);
     }
-    public function createdBy() {
+
+
+    public function createdBy()
+    {
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
-    public function invoices() {
+
+    public function acceptedBy()
+    {
+        return $this->belongsTo(User::class, 'accepted_by_user_id');
+    }
+
+    public function invoices()
+    {
         return $this->belongsToMany(Invoice::class, 'invoice_items');
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AirlineController;
 use App\Http\Controllers\Api\FlightController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\DepositController;
+use App\Http\Controllers\Api\ItemController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -72,4 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/flights', [FlightController::class, 'store'])->middleware('can:create flight');
     Route::put('/flights/{flight}', [FlightController::class, 'update'])->middleware('can:edit flight');
     Route::delete('/flights/{flight}', [FlightController::class, 'destroy'])->middleware('can:delete flight');
+
+
+    Route::get('/items', [ItemController::class, 'index'])->middleware('can:view all item');
+    Route::get('/items/{item}', [ItemController::class, 'show'])->middleware('can:show item');
+    Route::post('/items', [ItemController::class, 'store'])->middleware('can:create item');
+    Route::put('/items/{item}', [ItemController::class, 'update'])->middleware('can:edit item');
+    Route::delete('/items/{item}', [ItemController::class, 'destroy'])->middleware('can:delete item');
+    Route::post('/items/{item}/verify', [ItemController::class, 'verify'])->middleware('can:verify item');
 });
