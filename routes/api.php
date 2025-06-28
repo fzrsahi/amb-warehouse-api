@@ -68,5 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deposits/{deposit}/verify', [DepositController::class, 'verify'])->middleware('can:verify deposit');
 
     Route::get('/flights', [FlightController::class, 'index'])->middleware('can:view all flight');
+    Route::get('/flights/{flight}', [FlightController::class, 'show'])->middleware('can:show flight');
     Route::post('/flights', [FlightController::class, 'store'])->middleware('can:create flight');
+    Route::put('/flights/{flight}', [FlightController::class, 'update'])->middleware('can:edit flight');
+    Route::delete('/flights/{flight}', [FlightController::class, 'destroy'])->middleware('can:delete flight');
 });
