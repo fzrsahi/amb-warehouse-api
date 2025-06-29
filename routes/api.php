@@ -84,11 +84,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/items/{item}', [ItemController::class, 'update'])->middleware('can:edit item');
     Route::delete('/items/{item}', [ItemController::class, 'destroy'])->middleware('can:delete item');
     Route::post('/items/{item}/verify', [ItemController::class, 'verify'])->middleware('can:verify item');
-    Route::post('/items/out', [ItemController::class, 'out'])->middleware('can:out item');
+    // Route::post('/items/out', [ItemController::class, 'out'])->middleware('can:out item');
 
     Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('can:view all invoice');
     Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('can:create invoice');
+    Route::post('/invoices/auto-store', [InvoiceController::class, 'autoStore'])->middleware('can:create invoice');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->middleware('can:show invoice');
-    Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->middleware('can:edit invoice');
-    Route::post('/invoices/{invoice}/verify', [InvoiceController::class, 'verify'])->middleware('can:verify invoice');
+    // Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->middleware('can:edit invoice');
+    // Route::post('/invoices/{invoice}/verify', [InvoiceController::class, 'verify'])->middleware('can:verify invoice');
 });

@@ -21,7 +21,7 @@ class StoreInvoiceRequest extends FormRequest
         return [
             'company_id' => 'required|exists:companies,id',
             'item_ids' => 'required|array|min:1',
-            'item_ids.*' => 'required|integer|exists:items,id',
+            'item_ids.*' => 'required|integer',
         ];
     }
 
@@ -33,7 +33,6 @@ class StoreInvoiceRequest extends FormRequest
             'item_ids.required' => 'Daftar item wajib diisi.',
             'item_ids.array' => 'Item harus berupa array.',
             'item_ids.min' => 'Pilih minimal satu item untuk ditagih.',
-            'item_ids.*.exists' => 'Salah satu ID item tidak valid.',
         ];
     }
 
@@ -43,6 +42,12 @@ class StoreInvoiceRequest extends FormRequest
         $firstError = collect($errors)->first();
         $errorMessage = $firstError[0] ?? 'Validasi gagal';
 
-        throw new HttpResponseException($this->errorResponse($errorMessage, 422, $errors));
+        throw new HttpResponseException(
+            response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'data' => null,
+            ], 422)
+        );
     }
 }

@@ -90,29 +90,12 @@ class CompanyController extends Controller
                 'deposits.remarks.user:id,name,email',
                 'deposits.createdBy:id,name',
                 'deposits.acceptedBy:id,name',
-                'invoices.payments.createdBy:id,name',
-                'invoices.remarks.user:id,name,email',
                 'payments.invoice:id,invoice_number,total_amount'
             ]);
 
-            // Hitung saldo
             $totalDepositBalance = $company->getTotalDepositBalance();
             $totalPayments = $company->getTotalPayments();
             $remainingBalance = $company->getRemainingBalance();
-
-            // Ambil history pembayaran terbaru
-            $recentPayments = $company->payments()
-                ->with(['invoice:id,invoice_number,total_amount', 'createdBy:id,name'])
-                ->orderBy('paid_at', 'desc')
-                ->limit(10)
-                ->get();
-
-            // Ambil invoice terbaru
-            $recentInvoices = $company->invoices()
-                ->with(['payments', 'remarks.user:id,name'])
-                ->orderBy('created_at', 'desc')
-                ->limit(10)
-                ->get();
 
             $companyData = $company->toArray();
             $companyData['balance_info'] = [
@@ -120,8 +103,6 @@ class CompanyController extends Controller
                 'total_payments' => $totalPayments,
                 'remaining_balance' => $remainingBalance,
             ];
-            $companyData['recent_payments'] = $recentPayments;
-            $companyData['recent_invoices'] = $recentInvoices;
 
             return $this->successResponse($companyData, 'Data perusahaan berhasil diambil');
         } catch (\Exception $e) {

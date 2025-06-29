@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use App\Models\Invoice;
 use App\Models\Item;
+use App\Models\Company;
 use App\Http\Requests\PaginationRequest;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
@@ -51,7 +52,6 @@ class InvoiceController extends Controller
             $user = $request->user();
             $userRoleType = $user->roles->first()->type ?? null;
 
-            // Hanya warehouse/admin yang bisa membuat invoice
             if (!($user->hasRole('super-admin') || $userRoleType === 'warehouse')) {
                 return $this->forbiddenResponse('Hanya petugas warehouse yang dapat membuat invoice.');
             }
@@ -59,49 +59,50 @@ class InvoiceController extends Controller
             DB::beginTransaction();
 
             $data = $request->validated();
+
+            $items = Item::whereIn('id', $data['item_ids'])->get();
+
+            $itemsAlreadyOut = $items->where('out_at', '!=', null);
+            if ($itemsAlreadyOut->count() > 0) {
+                $itemCodes = $itemsAlreadyOut->pluck('code')->implode(', ');
+                return $this->errorResponse("Item dengan kode {$itemCodes} sudah keluar dan tidak dapat ditagih lagi.", 422);
+            }
+
             $data['created_by_user_id'] = $user->id;
             $data['issued_at'] = now();
 
-            // Ambil items untuk kalkulasi
-            $items = Item::whereIn('id', $data['item_ids'])->get();
-
-            // Hitung total chargeable weight
             $totalChargeableWeight = $items->sum('chargeable_weight');
             $data['total_chargeable_weight'] = $totalChargeableWeight;
 
-            // Kalkulasi biaya (contoh sederhana, bisa disesuaikan dengan business logic)
-            $cargoHandlingFee = 5000; // per kg
-            $airHandlingFee = 3000; // per kg
-            $inspectionFee = 10000; // flat rate
-            $adminFee = 5000; // flat rate
+            $cargoHandlingFee = 5000;
+            $airHandlingFee = 3000;
+            $inspectionFee = 10000;
+            $adminFee = 5000;
 
             $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFee;
             $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFee;
             $data['inspection_fee'] = $inspectionFee;
             $data['admin_fee'] = $adminFee;
 
-            // Hitung subtotal
             $data['subtotal'] = $data['cargo_handling_fee'] + $data['air_handling_fee'] + $data['inspection_fee'] + $data['admin_fee'];
 
-            // Hitung pajak (PPN 11%)
             $data['tax_amount'] = $data['subtotal'] * 0.11;
 
-            // Hitung PNBP (contoh: 1% dari subtotal)
             $data['pnbp_amount'] = $data['subtotal'] * 0.01;
 
-            // Hitung total
             $data['total_amount'] = $data['subtotal'] + $data['tax_amount'] + $data['pnbp_amount'];
 
-            // Generate invoice number
             $data['invoice_number'] = $this->generateInvoiceNumber();
 
-            // Buat invoice
             $invoice = Invoice::create($data);
 
-            // Attach items
             $invoice->items()->attach($data['item_ids']);
 
-            // Buat remark pertama
+            Item::whereIn('id', $data['item_ids'])->update([
+                'out_at' => now(),
+                'out_by_user_id' => $user->id
+            ]);
+
             $invoice->remarks()->create([
                 'user_id' => $user->id,
                 'model' => 'App\Models\Invoice',
@@ -362,5 +363,123 @@ class InvoiceController extends Controller
         }
 
         return $prefix . $year . $month . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function autoStore(StoreInvoiceRequest $request)
+    {
+        try {
+            $user = $request->user();
+            $userRoleType = $user->roles->first()->type ?? null;
+
+            if (!($user->hasRole('super-admin') || $userRoleType === 'warehouse')) {
+                return $this->forbiddenResponse('Hanya petugas warehouse yang dapat membuat invoice otomatis.');
+            }
+
+            DB::beginTransaction();
+
+            $data = $request->validated();
+
+            $items = Item::whereIn('id', $data['item_ids'])->get();
+
+            if ($items->count() !== count($data['item_ids'])) {
+                DB::rollBack();
+                $foundItemIds = $items->pluck('id')->toArray();
+                $missingItemIds = array_diff($data['item_ids'], $foundItemIds);
+                return $this->errorResponse("Item dengan ID " . implode(', ', $missingItemIds) . " tidak ditemukan.", 422);
+            }
+
+            $itemsAlreadyOut = $items->whereNotNull('out_at');
+            if ($itemsAlreadyOut->count() > 0) {
+                DB::rollBack();
+                $itemCodes = $itemsAlreadyOut->pluck('code')->implode(', ');
+                return $this->errorResponse("Item dengan kode {$itemCodes} sudah keluar dan tidak dapat ditagih lagi.", 422);
+            }
+
+            $data['created_by_user_id'] = $user->id;
+            $data['issued_at'] = now();
+
+            $totalChargeableWeight = $items->sum('chargeable_weight');
+            $data['total_chargeable_weight'] = $totalChargeableWeight;
+
+            $cargoHandlingFee = 5000;
+            $airHandlingFee = 3000;
+            $inspectionFee = 10000;
+            $adminFee = 5000;
+
+            $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFee;
+            $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFee;
+            $data['inspection_fee'] = $inspectionFee;
+            $data['admin_fee'] = $adminFee;
+
+            $data['subtotal'] = $data['cargo_handling_fee'] + $data['air_handling_fee'] + $data['inspection_fee'] + $data['admin_fee'];
+
+            $data['tax_amount'] = $data['subtotal'] * 0.11;
+
+            $data['pnbp_amount'] = $data['subtotal'] * 0.01;
+
+            $data['total_amount'] = $data['subtotal'] + $data['tax_amount'] + $data['pnbp_amount'];
+
+            $data['invoice_number'] = $this->generateInvoiceNumber();
+
+            $company = Company::find($data['company_id']);
+            if (!$company) {
+                DB::rollBack();
+                return $this->errorResponse('Perusahaan tidak ditemukan.', 422);
+            }
+
+            if ($company->balance < $data['total_amount']) {
+                DB::rollBack();
+                $shortfall = $data['total_amount'] - $company->balance;
+                $errorMessage = "Saldo perusahaan tidak mencukupi untuk membayar invoice ini. " .
+                    "Total tagihan: Rp " . number_format($data['total_amount'], 0, ',', '.') . ", " .
+                    "Saldo tersedia: Rp " . number_format($company->balance, 0, ',', '.') . ", " .
+                    "Kekurangan: Rp " . number_format($shortfall, 0, ',', '.');
+                return $this->errorResponse($errorMessage, 422);
+            }
+
+            $data['approval_status'] = 'approved';
+            $data['approved_by_user_id'] = $user->id;
+            $data['approved_at'] = now();
+            $data['payment_status'] = 'paid';
+            $data['paid_at'] = now();
+
+            $invoice = Invoice::create($data);
+
+            $invoice->items()->attach($data['item_ids']);
+
+            Item::whereIn('id', $data['item_ids'])->update([
+                'out_at' => now(),
+                'out_by_user_id' => $user->id
+            ]);
+
+            $company->decrement('balance', $data['total_amount']);
+
+            $invoice->payments()->create([
+                'amount' => $data['total_amount'],
+                'payment_method' => 'balance_deduction',
+                'payment_date' => now(),
+                'created_by_user_id' => $user->id,
+                'status' => 'completed',
+                'description' => 'Pembayaran otomatis melalui pemotongan saldo'
+            ]);
+
+            $invoice->remarks()->create([
+                'user_id' => $user->id,
+                'model' => 'App\Models\Invoice',
+                'model_id' => $invoice->id,
+                'status' => 'auto_paid',
+                'description' => 'Invoice dibuat dan dibayar otomatis melalui pemotongan saldo.',
+            ]);
+
+            DB::commit();
+
+            $invoice->load(['company:id,name', 'createdBy:id,name', 'items']);
+
+            return $this->successResponse($invoice, 'Invoice berhasil dibuat dan dibayar otomatis', 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal membuat invoice otomatis: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat membuat invoice otomatis');
+        }
     }
 }
