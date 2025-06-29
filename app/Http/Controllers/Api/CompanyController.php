@@ -118,6 +118,7 @@ class CompanyController extends Controller
                 'total_deposit' => $totalDepositBalance,
                 'total_payments' => $totalPayments,
                 'remaining_balance' => $remainingBalance,
+                'balance_status' => $remainingBalance >= 0 ? 'positive' : 'negative'
             ];
 
             return $this->successResponse($companyData, 'Data perusahaan berhasil diambil');
@@ -261,6 +262,7 @@ class CompanyController extends Controller
                     'total_deposit' => $totalDepositBalance,
                     'total_payments' => $totalPayments,
                     'remaining_balance' => $remainingBalance,
+                    'balance_status' => $remainingBalance >= 0 ? 'positive' : 'negative'
                 ],
                 'invoice_stats' => [
                     'total_invoices' => $totalInvoices,

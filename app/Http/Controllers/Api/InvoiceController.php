@@ -8,6 +8,7 @@ use App\Traits\ApiResponse;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Company;
+use App\Models\WarehouseSetting;
 use App\Http\Requests\InvoiceIndexRequest;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
@@ -107,55 +108,99 @@ class InvoiceController extends Controller
 
             $data = $request->validated();
 
-            $items = Item::whereIn('id', $data['item_ids'])->get();
+            // Validasi maksimal 5 item per invoice
+            if (count($data['item_ids']) > 5) {
+                return $this->errorResponse('Maksimal 5 item per invoice.', 422);
+            }
 
+            $items = Item::with(['flight.airline', 'flight.origin', 'flight.destination'])
+                ->whereIn('id', $data['item_ids'])
+                ->get();
+
+            if ($items->count() !== count($data['item_ids'])) {
+                return $this->errorResponse('Beberapa item tidak ditemukan.', 422);
+            }
+
+            // Validasi item tidak boleh sudah ada invoicenya
+            $itemsWithInvoice = $items->filter(function ($item) {
+                return $item->invoices()->exists();
+            });
+
+            if ($itemsWithInvoice->count() > 0) {
+                $itemCodes = $itemsWithInvoice->pluck('code')->implode(', ');
+                return $this->errorResponse("Item dengan kode {$itemCodes} sudah memiliki invoice.", 422);
+            }
+
+            // Validasi item sudah keluar
             $itemsAlreadyOut = $items->where('out_at', '!=', null);
             if ($itemsAlreadyOut->count() > 0) {
                 $itemCodes = $itemsAlreadyOut->pluck('code')->implode(', ');
                 return $this->errorResponse("Item dengan kode {$itemCodes} sudah keluar dan tidak dapat ditagih lagi.", 422);
             }
 
+            // Validasi status flight harus sama (semua incoming atau semua outgoing)
+            $flightStatuses = $items->pluck('flight.status')->unique();
+            if ($flightStatuses->count() > 1) {
+                return $this->errorResponse('Semua item harus memiliki status flight yang sama (incoming atau outgoing).', 422);
+            }
+
+            $flightStatus = $flightStatuses->first();
+
+            // Ambil data first item untuk generate invoice number
+            $firstItem = $items->first();
+            $flight = $firstItem->flight;
+
             $data['created_by_user_id'] = $user->id;
             $data['issued_at'] = now();
 
+            // Hitung total chargeable weight
             $totalChargeableWeight = $items->sum('chargeable_weight');
             $data['total_chargeable_weight'] = $totalChargeableWeight;
 
-            $cargoHandlingFee = 5000;
-            $airHandlingFee = 3000;
-            $inspectionFee = 10000;
-            $adminFee = 5000;
+            // Ambil pricing dari airline berdasarkan flight status
+            $airline = $flight->airline;
 
-            $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFee;
-            $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFee;
-            $data['inspection_fee'] = $inspectionFee;
+            // Cargo Handling Fee
+            if ($flightStatus === 'incoming') {
+                $cargoHandlingFeePerKg = $airline->cargo_handling_incoming_price;
+                $airHandlingFeePerKg = $airline->handling_airplane_incoming_price;
+                $jppgcFeePerKg = $airline->jppgc_incoming_price;
+            } else {
+                $cargoHandlingFeePerKg = $airline->cargo_handling_outgoing_price;
+                $airHandlingFeePerKg = $airline->handling_airplane_outgoing_price;
+                $jppgcFeePerKg = $airline->jppgc_outgoing_price;
+            }
+
+            $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFeePerKg;
+            $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFeePerKg;
+            $data['inspection_fee'] = $totalChargeableWeight * $jppgcFeePerKg;
+
+            // Ambil setting dari WarehouseSetting
+            $warehouseSetting = WarehouseSetting::first();
+            $adminFee = $warehouseSetting ? $warehouseSetting->admin_fee : 5000;
+            $taxRate = $warehouseSetting ? ($warehouseSetting->tax / 100) : 0.11;
+            $pnbpRate = $warehouseSetting ? ($warehouseSetting->pnbp / 100) : 0.01;
+
             $data['admin_fee'] = $adminFee;
 
             $data['subtotal'] = $data['cargo_handling_fee'] + $data['air_handling_fee'] + $data['inspection_fee'] + $data['admin_fee'];
 
-            $data['tax_amount'] = $data['subtotal'] * 0.11;
-
-            $data['pnbp_amount'] = $data['subtotal'] * 0.01;
+            $data['tax_amount'] = $data['subtotal'] * $taxRate;
+            $data['pnbp_amount'] = $data['subtotal'] * $pnbpRate;
 
             $data['total_amount'] = $data['subtotal'] + $data['tax_amount'] + $data['pnbp_amount'];
 
-            $data['invoice_number'] = $this->generateInvoiceNumber();
+            // Generate invoice number dengan format baru
+            $data['invoice_number'] = $this->generateInvoiceNumber($flight, $flightStatus);
 
             $invoice = Invoice::create($data);
 
             $invoice->items()->attach($data['item_ids']);
 
+            // Update items out_at dan out_by_user_id
             Item::whereIn('id', $data['item_ids'])->update([
                 'out_at' => now(),
                 'out_by_user_id' => $user->id
-            ]);
-
-            $invoice->remarks()->create([
-                'user_id' => $user->id,
-                'model' => 'App\Models\Invoice',
-                'model_id' => $invoice->id,
-                'status' => 'submit',
-                'description' => 'Invoice telah dibuat dan menunggu persetujuan.',
             ]);
 
             DB::commit();
@@ -321,17 +366,7 @@ class InvoiceController extends Controller
             $data = $request->validated();
 
             if ($data['status'] === 'approve') {
-                // Cek saldo sebelum approve
-                $company = $user->company;
-                $remainingBalance = $company->getRemainingBalance();
-
-                if (!$company->hasSufficientBalance($invoice->total_amount)) {
-                    return $this->errorResponse(
-                        "Saldo tidak mencukupi. Saldo tersedia: Rp " . number_format($remainingBalance, 0, ',', '.') .
-                            ", Total invoice: Rp " . number_format($invoice->total_amount, 0, ',', '.'),
-                        422
-                    );
-                }
+                // Hilangkan validasi saldo - saldo bisa minus
 
                 // Update status invoice
                 $invoice->update([
@@ -341,6 +376,7 @@ class InvoiceController extends Controller
                 ]);
 
                 // Buat payment record untuk pemotongan saldo otomatis
+                $company = $user->company;
                 $payment = $invoice->payments()->create([
                     'company_id' => $company->id,
                     'invoice_id' => $invoice->id,
@@ -391,25 +427,36 @@ class InvoiceController extends Controller
         }
     }
 
-    private function generateInvoiceNumber()
+    private function generateInvoiceNumber($flight, $flightStatus)
     {
-        $prefix = 'INV';
-        $year = date('Y');
-        $month = date('m');
+        // Format: INVOICE+ORIGIN + IN/OUT + DEST + datetime + string unique
+        $prefix = 'INVOICE';
 
-        // Ambil nomor terakhir untuk bulan ini
-        $lastInvoice = Invoice::where('invoice_number', 'like', "{$prefix}{$year}{$month}%")
+        // Get origin and destination codes
+        $originCode = $flight->origin->code ?? 'XXX';
+        $destinationCode = $flight->destination->code ?? 'XXX';
+
+        // Convert flight status to IN/OUT
+        $statusCode = ($flightStatus === 'incoming') ? 'IN' : 'OUT';
+
+        // Format datetime as YYYYMMDD
+        $datePart = date('Ymd');
+
+        // Generate unique sequence
+        $lastInvoice = Invoice::where('invoice_number', 'like', "{$prefix}{$originCode}{$statusCode}{$destinationCode}{$datePart}%")
             ->orderBy('invoice_number', 'desc')
             ->first();
 
         if ($lastInvoice) {
-            $lastNumber = (int) substr($lastInvoice->invoice_number, -4);
-            $newNumber = $lastNumber + 1;
+            $lastSequence = (int) substr($lastInvoice->invoice_number, -4);
+            $newSequence = $lastSequence + 1;
         } else {
-            $newNumber = 1;
+            $newSequence = 1;
         }
 
-        return $prefix . $year . $month . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        $uniqueString = str_pad($newSequence, 4, '0', STR_PAD_LEFT);
+
+        return strtoupper($prefix . $originCode . $statusCode . $destinationCode . $datePart . $uniqueString);
     }
 
     public function autoStore(StoreInvoiceRequest $request)
@@ -426,13 +473,30 @@ class InvoiceController extends Controller
 
             $data = $request->validated();
 
-            $items = Item::whereIn('id', $data['item_ids'])->get();
+            // Validasi maksimal 5 item per invoice
+            if (count($data['item_ids']) > 5) {
+                return $this->errorResponse('Maksimal 5 item per invoice.', 422);
+            }
+
+            $items = Item::with(['flight.airline', 'flight.origin', 'flight.destination'])
+                ->whereIn('id', $data['item_ids'])
+                ->get();
 
             if ($items->count() !== count($data['item_ids'])) {
                 DB::rollBack();
                 $foundItemIds = $items->pluck('id')->toArray();
                 $missingItemIds = array_diff($data['item_ids'], $foundItemIds);
                 return $this->errorResponse("Item dengan ID " . implode(', ', $missingItemIds) . " tidak ditemukan.", 422);
+            }
+
+            // Validasi item tidak boleh sudah ada invoicenya
+            $itemsWithInvoice = $items->filter(function ($item) {
+                return $item->invoices()->exists();
+            });
+
+            if ($itemsWithInvoice->count() > 0) {
+                $itemCodes = $itemsWithInvoice->pluck('code')->implode(', ');
+                return $this->errorResponse("Item dengan kode {$itemCodes} sudah memiliki invoice.", 422);
             }
 
             $itemsAlreadyOut = $items->whereNotNull('out_at');
@@ -442,31 +506,58 @@ class InvoiceController extends Controller
                 return $this->errorResponse("Item dengan kode {$itemCodes} sudah keluar dan tidak dapat ditagih lagi.", 422);
             }
 
+            // Validasi status flight harus sama (semua incoming atau semua outgoing)
+            $flightStatuses = $items->pluck('flight.status')->unique();
+            if ($flightStatuses->count() > 1) {
+                return $this->errorResponse('Semua item harus memiliki status flight yang sama (incoming atau outgoing).', 422);
+            }
+
+            $flightStatus = $flightStatuses->first();
+
+            // Ambil data first item untuk generate invoice number
+            $firstItem = $items->first();
+            $flight = $firstItem->flight;
+
             $data['created_by_user_id'] = $user->id;
             $data['issued_at'] = now();
 
             $totalChargeableWeight = $items->sum('chargeable_weight');
             $data['total_chargeable_weight'] = $totalChargeableWeight;
 
-            $cargoHandlingFee = 5000;
-            $airHandlingFee = 3000;
-            $inspectionFee = 10000;
-            $adminFee = 5000;
+            // Ambil pricing dari airline berdasarkan flight status
+            $airline = $flight->airline;
 
-            $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFee;
-            $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFee;
-            $data['inspection_fee'] = $inspectionFee;
+            // Cargo Handling Fee
+            if ($flightStatus === 'incoming') {
+                $cargoHandlingFeePerKg = $airline->cargo_handling_incoming_price;
+                $airHandlingFeePerKg = $airline->handling_airplane_incoming_price;
+                $jppgcFeePerKg = $airline->jppgc_incoming_price;
+            } else {
+                $cargoHandlingFeePerKg = $airline->cargo_handling_outgoing_price;
+                $airHandlingFeePerKg = $airline->handling_airplane_outgoing_price;
+                $jppgcFeePerKg = $airline->jppgc_outgoing_price;
+            }
+
+            $data['cargo_handling_fee'] = $totalChargeableWeight * $cargoHandlingFeePerKg;
+            $data['air_handling_fee'] = $totalChargeableWeight * $airHandlingFeePerKg;
+            $data['inspection_fee'] = $totalChargeableWeight * $jppgcFeePerKg;
+
+            // Ambil setting dari WarehouseSetting
+            $warehouseSetting = WarehouseSetting::first();
+            $adminFee = $warehouseSetting ? $warehouseSetting->admin_fee : 5000;
+            $taxRate = $warehouseSetting ? ($warehouseSetting->tax / 100) : 0.11;
+            $pnbpRate = $warehouseSetting ? ($warehouseSetting->pnbp / 100) : 0.01;
+
             $data['admin_fee'] = $adminFee;
 
             $data['subtotal'] = $data['cargo_handling_fee'] + $data['air_handling_fee'] + $data['inspection_fee'] + $data['admin_fee'];
 
-            $data['tax_amount'] = $data['subtotal'] * 0.11;
-
-            $data['pnbp_amount'] = $data['subtotal'] * 0.01;
+            $data['tax_amount'] = $data['subtotal'] * $taxRate;
+            $data['pnbp_amount'] = $data['subtotal'] * $pnbpRate;
 
             $data['total_amount'] = $data['subtotal'] + $data['tax_amount'] + $data['pnbp_amount'];
 
-            $data['invoice_number'] = $this->generateInvoiceNumber();
+            $data['invoice_number'] = $this->generateInvoiceNumber($flight, $flightStatus);
 
             $company = Company::find($data['company_id']);
             if (!$company) {
@@ -474,18 +565,7 @@ class InvoiceController extends Controller
                 return $this->errorResponse('Perusahaan tidak ditemukan.', 422);
             }
 
-            $remainingBalance = $company->getRemainingBalance();
-
-            if ($remainingBalance < $data['total_amount'] || $remainingBalance < 0) {
-                DB::rollBack();
-                $shortfall = $data['total_amount'] - $remainingBalance;
-                $errorMessage = "Saldo perusahaan tidak mencukupi untuk membayar invoice ini. " .
-                    "Total tagihan: Rp " . number_format($data['total_amount'], 0, ',', '.') . ", " .
-                    "Saldo tersedia: Rp " . number_format($remainingBalance, 0, ',', '.') . ", " .
-                    "Kekurangan: Rp " . number_format($shortfall, 0, ',', '.');
-                return $this->errorResponse($errorMessage, 422);
-            }
-
+            // Hilangkan validasi saldo - saldo bisa minus
             $data['approval_status'] = 'approved';
             $data['approved_by_user_id'] = $user->id;
             $data['approved_at'] = now();
@@ -510,14 +590,6 @@ class InvoiceController extends Controller
                 'description' => 'Pembayaran otomatis melalui pemotongan saldo',
                 'created_by_user_id' => $user->id,
                 'paid_at' => now(),
-            ]);
-
-            $invoice->remarks()->create([
-                'user_id' => $user->id,
-                'model' => 'App\Models\Invoice',
-                'model_id' => $invoice->id,
-                'status' => 'auto_paid',
-                'description' => 'Invoice dibuat dan dibayar otomatis melalui pemotongan saldo.',
             ]);
 
             DB::commit();
