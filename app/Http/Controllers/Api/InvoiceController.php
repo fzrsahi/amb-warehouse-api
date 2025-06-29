@@ -234,7 +234,9 @@ class InvoiceController extends Controller
                 'approvedBy:id,name,email',
                 'rejectedBy:id,name,email',
                 'company:id,name,email,phone,address',
-                'items',
+                'items.flight:id,flight_number,origin_airport_id,destination_airport_id,status',
+                'items.flight.origin:id,name,code',
+                'items.flight.destination:id,name,code',
                 'remarks' => function ($query) {
                     $query->with('user:id,name,email')
                         ->orderBy('created_at', 'desc');
