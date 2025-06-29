@@ -82,6 +82,7 @@ class FlightController extends Controller
             } else {
                 $data['status'] = 'incoming';
             }
+
             Flight::create($data);
             return $this->successResponse(null, 'Flight berhasil dibuat', code: 201);
         } catch (\Exception $e) {

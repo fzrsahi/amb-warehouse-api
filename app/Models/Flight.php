@@ -14,6 +14,7 @@ class Flight extends Model
         'status',
         'flight_date',
         'departure_at',
+        'arrival_at',
     ];
 
     public function origin()
