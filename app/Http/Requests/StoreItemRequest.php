@@ -19,11 +19,12 @@ class StoreItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'awb' => 'required|string|max:255|unique:items,awb',
+            'awb' => 'required|string|max:255',
             'flight_id' => 'required|exists:flights,id',
             'company_id' => 'nullable|exists:companies,id',
-            'commodity' => 'required|string|max:255',
+            'commodity_type_id' => 'required|exists:commodity_types,id',
             'qty' => 'required|integer|min:1',
+            'total_qty' => 'required|integer|min:1',
             'gross_weight' => 'required|numeric|min:0',
             'weight_calculation_method' => 'required|string|in:actual,volume',
             'length' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
@@ -36,13 +37,15 @@ class StoreItemRequest extends FormRequest
     {
         return [
             'awb.required' => 'Nomor AWB wajib diisi.',
-            'awb.unique' => 'Nomor AWB sudah terdaftar.',
             'flight_id.required' => 'Penerbangan wajib diisi.',
             'flight_id.exists' => 'Penerbangan tidak ditemukan.',
             'company_id.exists' => 'Perusahaan tidak ditemukan.',
-            'commodity.required' => 'Komoditas wajib diisi.',
+            'commodity_type_id.required' => 'Jenis komoditas wajib diisi.',
+            'commodity_type_id.exists' => 'Jenis komoditas tidak ditemukan.',
             'qty.required' => 'Jumlah (Qty) wajib diisi.',
             'qty.integer' => 'Jumlah (Qty) harus berupa angka.',
+            'total_qty.required' => 'Jumlah koli wajib diisi.',
+            'total_qty.integer' => 'Jumlah koli harus berupa angka.',
             'gross_weight.required' => 'Berat kotor wajib diisi.',
             'chargeable_weight.required' => 'Berat kena cas wajib diisi.',
             'weight_calculation_method.required' => 'Metode perhitungan berat wajib diisi.',

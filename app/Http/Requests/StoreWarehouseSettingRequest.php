@@ -30,6 +30,7 @@ class StoreWarehouseSettingRequest extends FormRequest
             'admin_fee' => 'required|numeric|min:0|max:999999999999.99',
             'tax' => 'required|numeric|min:0|max:100',
             'pnbp' => 'required|numeric|min:0|max:999999999999.99',
+            'minimal_charge_weight' => 'required|integer|min:0',
         ];
     }
 
@@ -53,6 +54,9 @@ class StoreWarehouseSettingRequest extends FormRequest
             'pnbp.numeric' => 'PNBP harus berupa angka',
             'pnbp.min' => 'PNBP minimal 0',
             'pnbp.max' => 'PNBP maksimal 999999999999.99',
+            'minimal_charge_weight.required' => 'Minimal charge weight wajib diisi',
+            'minimal_charge_weight.integer' => 'Minimal charge weight harus berupa angka',
+            'minimal_charge_weight.min' => 'Minimal charge weight minimal 0',
         ];
     }
 
@@ -67,6 +71,7 @@ class StoreWarehouseSettingRequest extends FormRequest
             'admin_fee' => 'biaya admin',
             'tax' => 'pajak',
             'pnbp' => 'PNBP',
+            'minimal_charge_weight' => 'minimal charge weight',
         ];
     }
 

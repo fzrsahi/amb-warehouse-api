@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('code')->unique()->nullable()->comment('Nomor Tanda Terima Barang (BTB/TTB) unik dari sistem.');
 
             // Sesuai dengan AWB -> 990-66429193
-            $table->string('awb')->unique()->comment('Air Waybill Number dari maskapai.');
+            $table->string('awb')->comment('Air Waybill Number dari maskapai.');
 
             // Sesuai dengan Customer -> KOTAG PUTRA GORONTALO
             // Menghubungkan ke tabel 'companies' (mitra)
@@ -27,11 +27,13 @@ return new class extends Migration
             // Menghubungkan ke tabel 'flights'
             $table->foreignId('flight_id')->nullable()->constrained('flights')->comment('ID Penerbangan yang digunakan.');
 
-            // Sesuai dengan Commodity -> AMPEL ISI TANGKI
-            $table->string('commodity')->comment('Deskripsi atau jenis barang.');
+            // Sesuai dengan Commodity -> menggunakan relasi ke tabel 'commodity_types'
+            // Menghubungkan ke tabel 'commodity_types'
+            $table->foreignId('commodity_type_id')->constrained('commodity_types')->comment('ID Jenis barang.');
 
             // Sesuai dengan Qty -> 1
             $table->integer('qty')->comment('Jumlah koli/paket.');
+            $table->integer('total_qty')->comment('Jumlah koli/paket.');
 
             // Sesuai dengan GW -> 5
             $table->decimal('gross_weight', 10, 2)->comment('Berat aktual barang dalam Kg.');

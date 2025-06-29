@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Flight;
+use App\Models\WarehouseSetting;
 use App\Http\Requests\ItemIndexRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
@@ -21,46 +22,64 @@ class ItemController extends Controller
     use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     /**
-     * Generate unique item code (BTB/TTB).
-     * Format: [OriginCode][Type][YYMM][Sequence] e.g., GTOCOD25060000156
+     * Generate unique item code.
+     * Format: ORIGIN + IN/OUT + DEST + datetime + string unique
+     * Example: GTIINCGK202506261234567
      */
     private function generateItemCode(Item $item): string
     {
-        $flight = Flight::with('origin')->find($item->flight_id);
-        $originCode = $flight->origin->code ?? 'XXX'; // Fallback code
-        $type = 'TTB'; // Tanda Terima Barang
-        $datePart = date('ym');
-        $sequence = str_pad($item->id, 7, '0', STR_PAD_LEFT);
+        $flight = Flight::with(['origin', 'destination'])->find($item->flight_id);
 
-        return strtoupper($originCode . $type . $datePart . $sequence);
+        // Get origin code (fallback to XXX)
+        $originCode = $flight->origin->code ?? 'XXX';
+
+        // Convert flight status to IN/OUT
+        $statusCode = ($flight->status === 'incoming') ? 'IN' : 'OUT';
+
+        // Get destination code (fallback to XXX)
+        $destinationCode = $flight->destination->code ?? 'XXX';
+
+        // Format datetime as YYYYMMDD
+        $datePart = date('Ymd');
+
+        // Generate unique string (combination of item ID and timestamp)
+        $uniqueString = str_pad($item->id, 7, '0', STR_PAD_LEFT);
+
+        return strtoupper($originCode . $statusCode . $destinationCode . $datePart . $uniqueString);
     }
 
     public function index(ItemIndexRequest $request)
     {
         try {
             $user = $request->user();
-            $query = Item::with(['company:id,name', 'flight.origin:id,code', 'flight.destination:id,code', 'createdBy:id,name', 'acceptedBy:id,name']);
+            $query = Item::with([
+                'company:id,name',
+                'flight.origin:id,code',
+                'flight.destination:id,code',
+                'commodityType:id,name',
+                'createdBy:id,name',
+                'acceptedBy:id,name'
+            ]);
 
             $userRoleType = $user->roles->first()->type ?? null;
 
             if ($user->hasRole('super-admin') || $userRoleType === 'warehouse') {
+                // Super admin and warehouse can see all items
             } elseif ($userRoleType === 'company') {
                 $query->where('company_id', $user->company_id);
             } else {
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat data barang.');
             }
 
-            // Get searchable fields and filters for Item
             $searchableFields = $this->getSearchableFields('Item');
             $defaultFilters = $this->getDefaultFilters('Item');
 
-            // Custom filters for Item
             $customFilters = [
                 'company_id' => ['type' => 'exact'],
                 'flight_id' => ['type' => 'exact'],
+                'commodity_type_id' => ['type' => 'exact'],
             ];
 
-            // Merge default and custom filters
             $filters = array_merge($defaultFilters, $customFilters);
 
             // Apply search and filters
@@ -144,6 +163,13 @@ class ItemController extends Controller
                 $chargeable_weight = max($gross_weight, $volume_weight);
             }
 
+            $warehouseSetting = WarehouseSetting::first();
+            $minimalChargeWeight = $warehouseSetting ? $warehouseSetting->minimal_charge_weight : 0;
+
+            if ($chargeable_weight < $minimalChargeWeight) {
+                $chargeable_weight = $minimalChargeWeight;
+            }
+
             $data['volume_weight'] = $volume_weight;
             $data['chargeable_weight'] = $chargeable_weight;
 
@@ -185,7 +211,15 @@ class ItemController extends Controller
                 return $this->forbiddenResponse();
             }
 
-            $item->load(['company:id,name', 'flight.origin:id,code', 'flight.destination:id,code', 'createdBy:id,name', 'acceptedBy:id,name', 'outBy:id,name']);
+            $item->load([
+                'company:id,name',
+                'flight.origin:id,code',
+                'flight.destination:id,code',
+                'commodityType:id,name',
+                'createdBy:id,name',
+                'acceptedBy:id,name',
+                'outBy:id,name'
+            ]);
             return $this->successResponse($item, 'Detail barang berhasil diambil');
         } catch (\Exception $e) {
             Log::error('Gagal mengambil detail barang: ' . $e->getMessage());

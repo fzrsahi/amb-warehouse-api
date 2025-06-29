@@ -14,8 +14,9 @@ class Item extends Model
         'awb',
         'company_id',
         'flight_id',
-        'commodity',
+        'commodity_type_id',
         'qty',
+        'total_qty',
         'gross_weight',
         'chargeable_weight',
         'volume_weight',
@@ -42,6 +43,12 @@ class Item extends Model
     public function flight()
     {
         return $this->belongsTo(Flight::class);
+    }
+
+
+    public function commodityType()
+    {
+        return $this->belongsTo(CommodityType::class);
     }
 
 

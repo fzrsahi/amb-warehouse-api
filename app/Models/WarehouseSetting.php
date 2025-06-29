@@ -13,11 +13,6 @@ class WarehouseSetting extends Model
         'admin_fee',
         'tax',
         'pnbp',
-    ];
-
-    protected $casts = [
-        'admin_fee' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'pnbp' => 'decimal:2',
+        'minimal_charge_weight',
     ];
 }

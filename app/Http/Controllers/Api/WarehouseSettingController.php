@@ -16,7 +16,6 @@ class WarehouseSettingController extends Controller
     public function index()
     {
         try {
-            // Get the first warehouse setting or create default if none exists
             $warehouseSetting = WarehouseSetting::first();
 
             if (!$warehouseSetting) {
@@ -24,6 +23,7 @@ class WarehouseSettingController extends Controller
                     'admin_fee' => 0,
                     'tax' => 0,
                     'pnbp' => 0,
+                    'minimal_charge_weight' => 0,
                 ]);
             }
 
@@ -38,7 +38,6 @@ class WarehouseSettingController extends Controller
     public function store(StoreWarehouseSettingRequest $request)
     {
         try {
-            // Check if setting already exists
             $existingSetting = WarehouseSetting::first();
             if ($existingSetting) {
                 return $this->errorResponse('Pengaturan gudang sudah ada. Gunakan endpoint update untuk mengubah data.', 422);
@@ -60,7 +59,6 @@ class WarehouseSettingController extends Controller
         try {
             $data = $request->validated();
 
-            // Get or create the warehouse setting
             $warehouseSetting = WarehouseSetting::first();
 
             if (!$warehouseSetting) {
