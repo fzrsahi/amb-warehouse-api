@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             AirlineSeeder::class,
             LocationSeeder::class,
+            FlightSeeder::class,
+            CompanySeeder::class,
         ]);
     }
 }

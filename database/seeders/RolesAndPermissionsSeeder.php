@@ -154,13 +154,15 @@ class RolesAndPermissionsSeeder extends Seeder
             'view all permission',
             'edit deposit',
             'delete deposit',
-            'manage deposit',
             'create item',
             'edit item',
             'delete item',
             'view all invoice',
             'view own invoice',
             'show invoice',
+            'manage invoice',
+            'manage user',
+            'manage item',
         ]);
 
         // 3. Role: Warehouse Admin (Internal Manager/Admin)
@@ -223,6 +225,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete remark',
             'verify deposit',
             'verify item',
+            'manage deposit',
+            'manage invoice',
+            'manage user',
+            'manage item',
         ]);
 
         // 4. Role: Super Admin (Full Access)
