@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('tax', 5, 2)->default(0)->comment('Pajak dalam persentase (contoh: 11.00 untuk 11%)');
             $table->decimal('pnbp', 15, 2)->default(0)->comment('PNBP dalam rupiah');
             $table->integer('minimal_charge_weight')->default(0)->comment('Minimal charge dalam satuan kg');
+            $table->decimal('max_negative_balance', 15, 2)->default(0)->comment('Maksimal minus saldo yang diperbolehkan');
             $table->timestamps();
         });
     }

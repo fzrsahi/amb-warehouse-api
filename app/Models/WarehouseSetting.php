@@ -14,5 +14,14 @@ class WarehouseSetting extends Model
         'tax',
         'pnbp',
         'minimal_charge_weight',
+        'max_negative_balance',
     ];
+
+    /**
+     * Get the max negative balance as string with minus sign
+     */
+    public function getMaxNegativeBalanceStringAttribute()
+    {
+        return '-' . number_format($this->max_negative_balance, 2, '.', '');
+    }
 }

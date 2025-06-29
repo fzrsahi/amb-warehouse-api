@@ -31,6 +31,7 @@ class UpdateWarehouseSettingRequest extends FormRequest
             'tax' => 'sometimes|numeric|min:0|max:100',
             'pnbp' => 'sometimes|numeric|min:0|max:999999999999.99',
             'minimal_charge_weight' => 'sometimes|integer|min:0',
+            'max_negative_balance' => 'sometimes|numeric|min:0|max:999999999999.99',
         ];
     }
 
@@ -53,6 +54,9 @@ class UpdateWarehouseSettingRequest extends FormRequest
             'pnbp.max' => 'PNBP maksimal 999999999999.99',
             'minimal_charge_weight.integer' => 'Minimal charge weight harus berupa angka',
             'minimal_charge_weight.min' => 'Minimal charge weight minimal 0',
+            'max_negative_balance.numeric' => 'Maksimal minus saldo harus berupa angka',
+            'max_negative_balance.min' => 'Maksimal minus saldo minimal 0',
+            'max_negative_balance.max' => 'Maksimal minus saldo maksimal 999999999999.99',
         ];
     }
 
@@ -68,6 +72,7 @@ class UpdateWarehouseSettingRequest extends FormRequest
             'tax' => 'pajak',
             'pnbp' => 'PNBP',
             'minimal_charge_weight' => 'minimal charge weight',
+            'max_negative_balance' => 'maksimal minus saldo',
         ];
     }
 
