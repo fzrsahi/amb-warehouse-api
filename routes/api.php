@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/items', [ItemController::class, 'index'])->middleware('can:view all item');
+    Route::get('/items/awb/{awb}', [ItemController::class, 'getByAwb'])->middleware('can:view all item');
     Route::get('/items/{item}', [ItemController::class, 'show'])->middleware('can:show item');
     Route::post('/items', [ItemController::class, 'store'])->middleware('can:create item');
     Route::put('/items/{item}', [ItemController::class, 'update'])->middleware('can:edit item');

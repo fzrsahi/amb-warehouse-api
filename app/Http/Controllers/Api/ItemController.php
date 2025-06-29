@@ -89,6 +89,9 @@ class ItemController extends Controller
             // Apply custom invoice filter
             $this->applyInvoiceFilter($query, $request);
 
+            // Apply AWB completeness filter
+            $this->applyAwbCompletenessFilter($query, $request);
+
             // Apply sorting
             if ($request->sort_by) {
                 $sortOrder = $request->sort_order ?? 'asc';
@@ -102,11 +105,79 @@ class ItemController extends Controller
             $pagination = $result["pagination"] ?? null;
             $data = $result["data"] ?? $result;
 
+            // Check AWB completeness - convert to array and add completion info
+            if ($data && count($data) > 0) {
+                // Convert to array if it's a Collection
+                $dataArray = is_object($data) ? $data->toArray() : $data;
+
+                // If items are objects, convert them to arrays
+                if (!empty($dataArray) && is_object($dataArray[0])) {
+                    $dataArray = array_map(function ($item) {
+                        return is_object($item) ? $item->toArray() : $item;
+                    }, $dataArray);
+                }
+
+                // Add AWB completion info
+                $dataArray = $this->checkAwbCompleteness($dataArray);
+                $data = $dataArray;
+            }
+
             return $this->successResponse($data, 'Data barang berhasil diambil', 200, $pagination);
         } catch (\Exception $e) {
             Log::error('Gagal mengambil data barang: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data barang');
         }
+    }
+
+    /**
+     * Check AWB completeness by comparing sum of qty with total_qty for each AWB
+     *
+     * @param array $items
+     * @return array
+     */
+    private function checkAwbCompleteness(array $items): array
+    {
+        // Group items by AWB
+        $awbGroups = [];
+        foreach ($items as $item) {
+            $awb = $item['awb'];
+            $qty = $item['qty'];
+            $totalQty = $item['total_qty'];
+
+            if (!isset($awbGroups[$awb])) {
+                $awbGroups[$awb] = [
+                    'items' => [],
+                    'total_qty_expected' => 0,
+                    'total_qty_actual' => 0
+                ];
+            }
+
+            $awbGroups[$awb]['items'][] = $item;
+            $awbGroups[$awb]['total_qty_expected'] = $totalQty; // Should be same for all items with same AWB
+            $awbGroups[$awb]['total_qty_actual'] += $qty;
+        }
+
+        // Add completeness information to each item
+        foreach ($items as &$item) {
+            $awb = $item['awb'];
+            $awbGroup = $awbGroups[$awb];
+
+            // Check if AWB is complete
+            $isAwbComplete = $awbGroup['total_qty_actual'] >= $awbGroup['total_qty_expected'];
+
+            // Add AWB completion info to item
+            $item['awb_completion'] = [
+                'awb' => $awb,
+                'expected_total_qty' => $awbGroup['total_qty_expected'],
+                'actual_total_qty' => $awbGroup['total_qty_actual'],
+                'is_complete' => $isAwbComplete,
+                'completion_percentage' => $awbGroup['total_qty_expected'] > 0
+                    ? round(($awbGroup['total_qty_actual'] / $awbGroup['total_qty_expected']) * 100, 2)
+                    : 0
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -127,6 +198,38 @@ class ItemController extends Controller
             } else {
                 // Items that are not included in invoices
                 $query->whereDoesntHave('invoices');
+            }
+        }
+    }
+
+    /**
+     * Apply AWB completeness filter
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param ItemIndexRequest $request
+     * @return void
+     */
+    private function applyAwbCompletenessFilter($query, $request)
+    {
+        if ($request->has('awb_complete')) {
+            $awbComplete = filter_var($request->awb_complete, FILTER_VALIDATE_BOOLEAN);
+
+            if ($awbComplete) {
+                // Items with complete AWB - where sum of qty equals total_qty for that AWB
+                $query->whereIn('awb', function ($subQuery) {
+                    $subQuery->select('awb')
+                        ->from('items')
+                        ->groupBy('awb', 'total_qty')
+                        ->havingRaw('SUM(qty) >= MAX(total_qty)');
+                });
+            } else {
+                // Items with incomplete AWB - where sum of qty is less than total_qty for that AWB
+                $query->whereIn('awb', function ($subQuery) {
+                    $subQuery->select('awb')
+                        ->from('items')
+                        ->groupBy('awb', 'total_qty')
+                        ->havingRaw('SUM(qty) < MAX(total_qty)');
+                });
             }
         }
     }
@@ -224,6 +327,70 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             Log::error('Gagal mengambil detail barang: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil detail barang');
+        }
+    }
+
+    public function getByAwb(string $awb)
+    {
+        try {
+            $user = request()->user();
+            $userRoleType = $user->roles->first()->type ?? null;
+
+            // Query items with the same AWB
+            $query = Item::with([
+                'company:id,name',
+                'flight.origin:id,code',
+                'flight.destination:id,code',
+                'commodityType:id,name',
+                'createdBy:id,name',
+                'acceptedBy:id,name',
+                'outBy:id,name'
+            ])->where('awb', $awb);
+
+            // Apply authorization
+            if ($user->hasRole('super-admin') || $userRoleType === 'warehouse') {
+                // Super admin and warehouse can see all items
+            } elseif ($userRoleType === 'company') {
+                $query->where('company_id', $user->company_id);
+            } else {
+                return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat data barang.');
+            }
+
+            $items = $query->get();
+
+            if ($items->isEmpty()) {
+                return $this->notFoundResponse('Tidak ada barang dengan AWB tersebut atau Anda tidak memiliki akses');
+            }
+
+            // Convert to array and add AWB completion info
+            $dataArray = $items->toArray();
+            $dataArray = $this->checkAwbCompleteness($dataArray);
+
+            // Add summary information
+            $firstItem = $dataArray[0];
+            $awbSummary = [
+                'awb' => $awb,
+                'total_items' => count($dataArray),
+                'expected_total_qty' => $firstItem['awb_completion']['expected_total_qty'],
+                'actual_total_qty' => $firstItem['awb_completion']['actual_total_qty'],
+                'is_complete' => $firstItem['awb_completion']['is_complete'],
+                'completion_percentage' => $firstItem['awb_completion']['completion_percentage'],
+                'company' => $firstItem['company'],
+                'flight' => isset($firstItem['flight']) ? [
+                    'origin' => $firstItem['flight']['origin'],
+                    'destination' => $firstItem['flight']['destination']
+                ] : null
+            ];
+
+            $responseData = [
+                'awb_summary' => $awbSummary,
+                'items' => $dataArray
+            ];
+
+            return $this->successResponse($responseData, "Data barang dengan AWB {$awb} berhasil diambil");
+        } catch (\Exception $e) {
+            Log::error('Gagal mengambil data barang berdasarkan AWB: ' . $e->getMessage());
+            return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data barang');
         }
     }
 

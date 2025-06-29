@@ -16,6 +16,7 @@ class ItemIndexRequest extends PaginationRequest
             'flight_id' => 'nullable|integer|exists:flights,id',
             'commodity_type_id' => 'nullable|integer|exists:commodity_types,id',
             'in_invoice' => 'nullable|boolean',
+            'awb_complete' => 'nullable|boolean',
         ];
     }
 
@@ -34,6 +35,7 @@ class ItemIndexRequest extends PaginationRequest
             'commodity_type_id.integer' => 'ID jenis komoditas harus berupa angka',
             'commodity_type_id.exists' => 'Jenis komoditas tidak ditemukan',
             'in_invoice.boolean' => 'Filter invoice harus berupa boolean (true/false)',
+            'awb_complete.boolean' => 'Filter kelengkapan AWB harus berupa boolean (true/false)',
         ];
     }
 
@@ -49,6 +51,7 @@ class ItemIndexRequest extends PaginationRequest
             'flight_id' => 'penerbangan',
             'commodity_type_id' => 'jenis komoditas',
             'in_invoice' => 'dalam invoice',
+            'awb_complete' => 'kelengkapan AWB',
         ];
     }
 }
