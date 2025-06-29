@@ -167,6 +167,7 @@ trait SearchFilterTrait
             'Permission' => ['name'],
             'CommodityType' => ['name'],
             'CommonUsageString' => ['name'],
+            'WarehouseSetting' => ['admin_fee', 'tax', 'pnbp'],
         ];
 
         return $searchableFields[$model] ?? [];

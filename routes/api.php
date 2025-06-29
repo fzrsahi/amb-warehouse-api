@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CommodityTypeController;
 use App\Http\Controllers\Api\CommonUsageStringController;
+use App\Http\Controllers\Api\WarehouseSettingController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -103,4 +104,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'show'])->middleware('can:show common_usage_string');
     Route::put('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'update'])->middleware('can:edit common_usage_string');
     Route::delete('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'destroy'])->middleware('can:delete common_usage_string');
+
+    Route::get('/warehouse-settings', [WarehouseSettingController::class, 'index'])->middleware('can:view all warehouse_setting');
+    Route::post('/warehouse-settings', [WarehouseSettingController::class, 'store'])->middleware('can:create warehouse_setting');
+    Route::put('/warehouse-settings', [WarehouseSettingController::class, 'update'])->middleware('can:edit warehouse_setting');
+    Route::delete('/warehouse-settings', [WarehouseSettingController::class, 'destroy'])->middleware('can:delete warehouse_setting');
 });

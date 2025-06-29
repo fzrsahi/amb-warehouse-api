@@ -123,6 +123,14 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit common_usage_string', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete common_usage_string', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage common_usage_string', 'guard_name' => 'web']);
+
+        // Warehouse Settings
+        Permission::create(['name' => 'view all warehouse_setting', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show warehouse_setting', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create warehouse_setting', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit warehouse_setting', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete warehouse_setting', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage warehouse_setting', 'guard_name' => 'web']);
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
@@ -137,6 +145,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'show flight',
             'view all location',
             'show location',
+            'view all warehouse_setting',
+            'show warehouse_setting',
         ]);
 
         // 2. Role: Partner Admin (Client Company Staff)
@@ -249,6 +259,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'create common_usage_string',
             'edit common_usage_string',
             'delete common_usage_string',
+            'view all warehouse_setting',
+            'show warehouse_setting',
+            'create warehouse_setting',
+            'edit warehouse_setting',
+            'delete warehouse_setting',
             'verify deposit',
             'verify item',
             'manage deposit',
@@ -257,6 +272,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage item',
             'manage commodity_type',
             'manage common_usage_string',
+            'manage warehouse_setting',
         ]);
 
         // 4. Role: Super Admin (Full Access)
