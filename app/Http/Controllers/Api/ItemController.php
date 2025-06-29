@@ -5,19 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Flight;
-use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\ItemIndexRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Http\Requests\OutItemRequest;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     /**
      * Generate unique item code (BTB/TTB).
@@ -34,7 +35,7 @@ class ItemController extends Controller
         return strtoupper($originCode . $type . $datePart . $sequence);
     }
 
-    public function index(PaginationRequest $request)
+    public function index(ItemIndexRequest $request)
     {
         try {
             $user = $request->user();
@@ -49,6 +50,34 @@ class ItemController extends Controller
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat data barang.');
             }
 
+            // Get searchable fields and filters for Item
+            $searchableFields = $this->getSearchableFields('Item');
+            $defaultFilters = $this->getDefaultFilters('Item');
+
+            // Custom filters for Item
+            $customFilters = [
+                'company_id' => ['type' => 'exact'],
+                'flight_id' => ['type' => 'exact'],
+            ];
+
+            // Merge default and custom filters
+            $filters = array_merge($defaultFilters, $customFilters);
+
+            // Apply search and filters
+            $this->applySearch($query, $request, $searchableFields);
+            $this->applyFilters($query, $request, $filters);
+
+            // Apply custom invoice filter
+            $this->applyInvoiceFilter($query, $request);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
             $result = $this->handlePaginationWithFormat($query, $request);
 
             $pagination = $result["pagination"] ?? null;
@@ -58,6 +87,28 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             Log::error('Gagal mengambil data barang: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data barang');
+        }
+    }
+
+    /**
+     * Apply invoice filter to check if items are included in invoices
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param ItemIndexRequest $request
+     * @return void
+     */
+    private function applyInvoiceFilter($query, $request)
+    {
+        if ($request->has('in_invoice')) {
+            $inInvoice = filter_var($request->in_invoice, FILTER_VALIDATE_BOOLEAN);
+
+            if ($inInvoice) {
+                // Items that are included in invoices
+                $query->whereHas('invoices');
+            } else {
+                // Items that are not included in invoices
+                $query->whereDoesntHave('invoices');
+            }
         }
     }
 

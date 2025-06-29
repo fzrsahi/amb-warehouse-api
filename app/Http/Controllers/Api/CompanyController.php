@@ -10,13 +10,14 @@ use App\Models\Company;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     public function store(StoreCompanyRequest $request)
     {
@@ -59,6 +60,21 @@ class CompanyController extends Controller
     {
         try {
             $query = Company::query();
+
+            // Get searchable fields for Company
+            $searchableFields = $this->getSearchableFields('Company');
+
+            // Apply search
+            $this->applySearch($query, $request, $searchableFields);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
             $result = $this->handlePaginationWithFormat($query, $request);
 
             $pagination = $result["pagination"] ?? null;

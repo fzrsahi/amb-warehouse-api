@@ -7,11 +7,12 @@ use App\Http\Requests\PaginationRequest;
 use Spatie\Permission\Models\Permission;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use Illuminate\Support\Facades\Log;
 
 class PermissionController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     public function index(PaginationRequest $request)
     {
@@ -52,6 +53,20 @@ class PermissionController extends Controller
                 });
             } else {
                 $permissionsQuery->whereRaw('1 = 0');
+            }
+
+            // Get searchable fields for Permission
+            $searchableFields = $this->getSearchableFields('Permission');
+
+            // Apply search
+            $this->applySearch($permissionsQuery, $request, $searchableFields);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $permissionsQuery->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $permissionsQuery->orderBy('name', 'asc');
             }
 
             $result = $this->handlePaginationWithFormat($permissionsQuery, $request, ['id', 'name']);

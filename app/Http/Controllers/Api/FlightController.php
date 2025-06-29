@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use App\Models\Flight;
-use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\FlightIndexRequest;
 use App\Traits\ApiResponse;
 use App\Http\Requests\StoreFlightRequest;
 use App\Http\Requests\UpdateFlightRequest;
@@ -14,12 +15,40 @@ use Illuminate\Support\Facades\Log;
 
 class FlightController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
-    public function index(PaginationRequest $request)
+    public function index(FlightIndexRequest $request)
     {
         try {
             $query = Flight::with(['origin:id,name,code', 'destination:id,name,code', 'airline:id,name,code']);
+
+            $searchableFields = $this->getSearchableFields('Flight');
+
+            $this->applySearch($query, $request, $searchableFields);
+
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->airline_id) {
+                $query->where('airline_id', $request->airline_id);
+            }
+
+            if ($request->arrival_time_start) {
+                $query->whereDate('arrival_time', '>=', $request->arrival_time_start);
+            }
+
+            if ($request->arrival_time_end) {
+                $query->whereDate('arrival_time', '<=', $request->arrival_time_end);
+            }
+
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
             $result = $this->handlePaginationWithFormat($query, $request);
 
             $pagination = $result["pagination"] ?? null;

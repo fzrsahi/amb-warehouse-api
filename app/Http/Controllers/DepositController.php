@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\DepositIndexRequest;
 use App\Http\Requests\StoreDepositRequest;
 use App\Http\Requests\UpdateDepositRequest;
 use App\Traits\ApiResponse;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use App\Models\Deposit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -14,9 +15,9 @@ use App\Http\Requests\VerifyDepositRequest;
 
 class DepositController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
-    public function index(PaginationRequest $request)
+    public function index(DepositIndexRequest $request)
     {
         try {
             $user = $request->user();
@@ -32,6 +33,25 @@ class DepositController extends Controller
                 $query->where('company_id', $user->company_id);
             } else {
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat data deposit');
+            }
+
+            // Get searchable fields for Deposit
+            $searchableFields = $this->getSearchableFields('Deposit');
+
+            // Apply search
+            $this->applySearch($query, $request, $searchableFields);
+
+            // Apply status filter
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
             }
 
             $result = $this->handlePaginationWithFormat($query, $request);

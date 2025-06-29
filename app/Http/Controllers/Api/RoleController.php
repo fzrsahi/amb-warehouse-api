@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Traits\SearchFilterTrait;
 
 class RoleController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     public function index(PaginationRequest $request)
     {
@@ -33,6 +34,20 @@ class RoleController extends Controller
                 $rolesQuery->where('type', 'company');
             } else {
                 $rolesQuery->whereRaw('1 = 0');
+            }
+
+            // Get searchable fields for Role
+            $searchableFields = $this->getSearchableFields('Role');
+
+            // Apply search
+            $this->applySearch($rolesQuery, $request, $searchableFields);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $rolesQuery->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $rolesQuery->orderBy('name', 'asc');
             }
 
             $rolesQuery->with(['permissions' => function ($query) {

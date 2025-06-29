@@ -8,19 +8,20 @@ use App\Traits\ApiResponse;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\Company;
-use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\InvoiceIndexRequest;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Requests\VerifyInvoiceRequest;
 use App\Traits\PaginationTrait;
+use App\Traits\SearchFilterTrait;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
-    public function index(PaginationRequest $request)
+    public function index(InvoiceIndexRequest $request)
     {
         try {
             $user = $request->user();
@@ -35,6 +36,34 @@ class InvoiceController extends Controller
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk melihat invoice.');
             }
 
+            // Get searchable fields and filters for Invoice
+            $searchableFields = $this->getSearchableFields('Invoice');
+            $defaultFilters = $this->getDefaultFilters('Invoice');
+
+            // Custom filters for Invoice
+            $customFilters = [
+                'status' => ['type' => 'exact'],
+                'company_id' => ['type' => 'exact'],
+            ];
+
+            // Merge default and custom filters
+            $filters = array_merge($defaultFilters, $customFilters);
+
+            // Apply search and filters
+            $this->applySearch($query, $request, $searchableFields);
+            $this->applyFilters($query, $request, $filters);
+
+            // Apply custom date range filter for in_at
+            $this->applyInAtDateRangeFilter($query, $request);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
             $result = $this->handlePaginationWithFormat($query, $request);
             $pagination = $result["pagination"] ?? null;
             $data = $result["data"] ?? $result;
@@ -43,6 +72,24 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             Log::error('Gagal mengambil data invoice: ' . $e->getMessage());
             return $this->serverErrorResponse('Terjadi kesalahan saat mengambil data invoice');
+        }
+    }
+
+    /**
+     * Apply date range filter for in_at field
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param InvoiceIndexRequest $request
+     * @return void
+     */
+    private function applyInAtDateRangeFilter($query, $request)
+    {
+        if ($request->start_date) {
+            $query->where('in_at', '>=', $request->start_date);
+        }
+
+        if ($request->end_date) {
+            $query->where('in_at', '<=', $request->end_date . ' 23:59:59');
         }
     }
 

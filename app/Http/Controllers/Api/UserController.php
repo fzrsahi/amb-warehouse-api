@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PaginationRequest;
+use App\Http\Requests\UserIndexRequest;
 use App\Traits\ApiResponse;
 use App\Models\User;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Traits\SearchFilterTrait;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,9 +17,9 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
-    public function index(PaginationRequest $request)
+    public function index(UserIndexRequest $request)
     {
         try {
             $user = $request->user();
@@ -40,6 +41,35 @@ class UserController extends Controller
                     ->with(['roles:id,name,type', 'company:id,name']);
             } else {
                 $usersQuery->whereRaw('1 = 0');
+            }
+
+            // Get searchable fields and filters for User
+            $searchableFields = $this->getSearchableFields('User');
+            $defaultFilters = $this->getDefaultFilters('User');
+
+            // Custom filters for User
+            $customFilters = [
+                'role_id' => ['type' => 'relation', 'relation' => 'roles', 'field' => 'id'],
+                'company_id' => ['type' => 'exact'],
+                'created_at' => ['type' => 'date_range'],
+                'updated_at' => ['type' => 'date_range'],
+                'email' => ['type' => 'like'],
+                'role_type' => ['type' => 'relation', 'relation' => 'roles', 'field' => 'type'],
+            ];
+
+            // Merge default and custom filters
+            $filters = array_merge($defaultFilters, $customFilters);
+
+            // Apply search and filters
+            $this->applySearch($usersQuery, $request, $searchableFields);
+            $this->applyFilters($usersQuery, $request, $filters);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $usersQuery->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $usersQuery->orderBy('created_at', 'desc');
             }
 
             $result = $this->handlePaginationWithFormat($usersQuery, $request, ["id", "name", "email", "company_id"]);

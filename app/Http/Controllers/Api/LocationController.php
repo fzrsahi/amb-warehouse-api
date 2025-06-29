@@ -10,16 +10,32 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Location;
 use App\Http\Requests\StoreLocationRequest;
 use App\Http\Requests\UpdateLocationRequest;
+use App\Traits\SearchFilterTrait;
 
 
 class LocationController extends Controller
 {
-    use ApiResponse, PaginationTrait;
+    use ApiResponse, PaginationTrait, SearchFilterTrait;
 
     public function index(PaginationRequest $request)
     {
         try {
             $query = Location::query();
+
+            // Get searchable fields for Location
+            $searchableFields = $this->getSearchableFields('Location');
+
+            // Apply search
+            $this->applySearch($query, $request, $searchableFields);
+
+            // Apply sorting
+            if ($request->sort_by) {
+                $sortOrder = $request->sort_order ?? 'asc';
+                $query->orderBy($request->sort_by, $sortOrder);
+            } else {
+                $query->orderBy('name', 'asc');
+            }
+
             $result = $this->handlePaginationWithFormat($query, $request, ["id", "name", "code"]);
 
             $pagination = $result["pagination"] ?? null;
