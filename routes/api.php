@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\DepositController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\CommodityTypeController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -89,4 +90,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('can:create invoice');
     Route::post('/invoices/auto-store', [InvoiceController::class, 'autoStore'])->middleware('can:create invoice');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->middleware('can:show invoice');
+
+    Route::get('/commodity-types', [CommodityTypeController::class, 'index'])->middleware('can:view all commodity_type');
+    Route::post('/commodity-types', [CommodityTypeController::class, 'store'])->middleware('can:create commodity_type');
+    Route::get('/commodity-types/{commodityType}', [CommodityTypeController::class, 'show'])->middleware('can:show commodity_type');
+    Route::put('/commodity-types/{commodityType}', [CommodityTypeController::class, 'update'])->middleware('can:edit commodity_type');
+    Route::delete('/commodity-types/{commodityType}', [CommodityTypeController::class, 'destroy'])->middleware('can:delete commodity_type');
 });

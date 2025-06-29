@@ -107,6 +107,14 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete remark', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage remark', 'guard_name' => 'web']);
+
+        // Commodity Types
+        Permission::create(['name' => 'view all commodity_type', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show commodity_type', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create commodity_type', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit commodity_type', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete commodity_type', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage commodity_type', 'guard_name' => 'web']);
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
@@ -223,12 +231,18 @@ class RolesAndPermissionsSeeder extends Seeder
             'create remark',
             'edit remark',
             'delete remark',
+            'view all commodity_type',
+            'show commodity_type',
+            'create commodity_type',
+            'edit commodity_type',
+            'delete commodity_type',
             'verify deposit',
             'verify item',
             'manage deposit',
             'manage invoice',
             'manage user',
             'manage item',
+            'manage commodity_type',
         ]);
 
         // 4. Role: Super Admin (Full Access)

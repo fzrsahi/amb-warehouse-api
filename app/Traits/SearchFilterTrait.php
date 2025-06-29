@@ -165,6 +165,7 @@ trait SearchFilterTrait
             'Airline' => ['name', 'code'],
             'Role' => ['name'],
             'Permission' => ['name'],
+            'CommodityType' => ['name'],
         ];
 
         return $searchableFields[$model] ?? [];
