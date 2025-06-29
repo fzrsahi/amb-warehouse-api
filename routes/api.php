@@ -14,6 +14,7 @@ use App\Http\Controllers\DepositController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\CommodityTypeController;
+use App\Http\Controllers\Api\CommonUsageStringController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -96,4 +97,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/commodity-types/{commodityType}', [CommodityTypeController::class, 'show'])->middleware('can:show commodity_type');
     Route::put('/commodity-types/{commodityType}', [CommodityTypeController::class, 'update'])->middleware('can:edit commodity_type');
     Route::delete('/commodity-types/{commodityType}', [CommodityTypeController::class, 'destroy'])->middleware('can:delete commodity_type');
+
+    Route::get('/common-usage-strings', [CommonUsageStringController::class, 'index'])->middleware('can:view all common_usage_string');
+    Route::post('/common-usage-strings', [CommonUsageStringController::class, 'store'])->middleware('can:create common_usage_string');
+    Route::get('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'show'])->middleware('can:show common_usage_string');
+    Route::put('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'update'])->middleware('can:edit common_usage_string');
+    Route::delete('/common-usage-strings/{commonUsageString}', [CommonUsageStringController::class, 'destroy'])->middleware('can:delete common_usage_string');
 });

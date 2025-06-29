@@ -166,6 +166,7 @@ trait SearchFilterTrait
             'Role' => ['name'],
             'Permission' => ['name'],
             'CommodityType' => ['name'],
+            'CommonUsageString' => ['name'],
         ];
 
         return $searchableFields[$model] ?? [];

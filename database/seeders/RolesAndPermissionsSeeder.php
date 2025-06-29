@@ -115,6 +115,14 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'edit commodity_type', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete commodity_type', 'guard_name' => 'web']);
         Permission::create(['name' => 'manage commodity_type', 'guard_name' => 'web']);
+
+        // Common Usage Strings
+        Permission::create(['name' => 'view all common_usage_string', 'guard_name' => 'web']);
+        Permission::create(['name' => 'show common_usage_string', 'guard_name' => 'web']);
+        Permission::create(['name' => 'create common_usage_string', 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit common_usage_string', 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete common_usage_string', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage common_usage_string', 'guard_name' => 'web']);
         // === BUAT PERAN (ROLES) & BERIKAN HAK AKSES ===
 
         // 1. Role: Warehouse Staff (Internal Operational Staff)
@@ -236,6 +244,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'create commodity_type',
             'edit commodity_type',
             'delete commodity_type',
+            'view all common_usage_string',
+            'show common_usage_string',
+            'create common_usage_string',
+            'edit common_usage_string',
+            'delete common_usage_string',
             'verify deposit',
             'verify item',
             'manage deposit',
@@ -243,6 +256,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage user',
             'manage item',
             'manage commodity_type',
+            'manage common_usage_string',
         ]);
 
         // 4. Role: Super Admin (Full Access)

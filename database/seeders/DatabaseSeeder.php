@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             FlightSeeder::class,
             CompanySeeder::class,
+            CommodityTypeSeeder::class,
         ]);
     }
 }
