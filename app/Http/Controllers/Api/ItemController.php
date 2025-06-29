@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Flight;
 use App\Models\WarehouseSetting;
+use App\Models\CommonUsageString;
 use App\Http\Requests\ItemIndexRequest;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
@@ -46,6 +47,31 @@ class ItemController extends Controller
         $uniqueString = str_pad($item->id, 7, '0', STR_PAD_LEFT);
 
         return strtoupper($originCode . $statusCode . $destinationCode . $datePart . $uniqueString);
+    }
+
+    /**
+     * Create or find existing partner in CommonUsageString
+     * 
+     * @param string $partnerName
+     * @return void
+     */
+    private function createOrFindPartner(string $partnerName): void
+    {
+        try {
+            // Check if partner already exists (case insensitive)
+            $existingPartner = CommonUsageString::whereRaw('LOWER(name) = ?', [strtolower($partnerName)])->first();
+
+            if (!$existingPartner) {
+                // Create new partner if it doesn't exist
+                CommonUsageString::create(['name' => $partnerName]);
+                Log::info("Created new partner in CommonUsageString: {$partnerName}");
+            } else {
+                Log::info("Partner already exists in CommonUsageString: {$partnerName}");
+            }
+        } catch (\Exception $e) {
+            // Log error but don't throw - partner creation is supplementary
+            Log::warning("Failed to create/find partner in CommonUsageString: {$partnerName}. Error: " . $e->getMessage());
+        }
     }
 
     public function index(ItemIndexRequest $request)
@@ -249,6 +275,11 @@ class ItemController extends Controller
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk membuat item');
             }
 
+            // Create or find partner in CommonUsageString
+            if (!empty($data['partner'])) {
+                $this->createOrFindPartner($data['partner']);
+            }
+
             $data['created_by_user_id'] = $user->id;
 
             $gross_weight = (float) $data['gross_weight'];
@@ -434,6 +465,11 @@ class ItemController extends Controller
                 $data['company_id'] = $user->company_id;
             } else {
                 return $this->forbiddenResponse('Anda tidak memiliki akses untuk mengedit item ini');
+            }
+
+            // Create or find partner in CommonUsageString if partner is being updated
+            if (!empty($data['partner']) && $data['partner'] !== $item->partner) {
+                $this->createOrFindPartner($data['partner']);
             }
 
             $gross_weight = (float) $data['gross_weight'];

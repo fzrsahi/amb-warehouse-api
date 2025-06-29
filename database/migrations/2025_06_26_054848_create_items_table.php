@@ -44,6 +44,8 @@ return new class extends Migration
             // Status item: pending_submission (by company), at_origin_warehouse (accepted by warehouse), etc.
             $table->string('status')->default('pending_submission');
 
+            $table->string('partner')->default('');
+
             // Diisi oleh user company saat submit, atau user warehouse saat menerima
             $table->foreignId('created_by_user_id')->constrained('users')->comment('ID Petugas yang membuat data item.');
 

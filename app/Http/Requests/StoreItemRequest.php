@@ -30,6 +30,8 @@ class StoreItemRequest extends FormRequest
             'length' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
             'width' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
             'height' => 'required_if:weight_calculation_method,volume|nullable|numeric|min:0',
+            "partner" => "required|string|max:255",
+
         ];
     }
 
@@ -57,6 +59,9 @@ class StoreItemRequest extends FormRequest
             'length.required_if' => 'Panjang wajib diisi jika metode perhitungan berat adalah volume.',
             'width.required_if' => 'Lebar wajib diisi jika metode perhitungan berat adalah volume.',
             'height.required_if' => 'Tinggi wajib diisi jika metode perhitungan berat adalah volume.',
+            'partner.required' => 'Partner wajib diisi.',
+            'partner.string' => 'Partner harus berupa string.',
+            'partner.max' => 'Partner maksimal 255 karakter.',
         ];
     }
 

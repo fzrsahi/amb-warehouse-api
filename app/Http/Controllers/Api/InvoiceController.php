@@ -578,7 +578,8 @@ class InvoiceController extends Controller
 
             Item::whereIn('id', $data['item_ids'])->update([
                 'out_at' => now(),
-                'out_by_user_id' => $user->id
+                'out_by_user_id' => $user->id,
+                'status' => 'out_origin_warehouse'
             ]);
 
             $invoice->payments()->create([

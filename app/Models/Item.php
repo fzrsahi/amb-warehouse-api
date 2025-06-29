@@ -31,6 +31,7 @@ class Item extends Model
         'accepted_at',
         'in_at',
         'out_at',
+        'partner',
     ];
 
 
