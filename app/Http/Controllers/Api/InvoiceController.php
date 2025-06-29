@@ -427,12 +427,14 @@ class InvoiceController extends Controller
                 return $this->errorResponse('Perusahaan tidak ditemukan.', 422);
             }
 
-            if ($company->balance < $data['total_amount']) {
+            $remainingBalance = $company->getRemainingBalance();
+
+            if ($remainingBalance < $data['total_amount'] || $remainingBalance < 0) {
                 DB::rollBack();
-                $shortfall = $data['total_amount'] - $company->balance;
+                $shortfall = $data['total_amount'] - $remainingBalance;
                 $errorMessage = "Saldo perusahaan tidak mencukupi untuk membayar invoice ini. " .
                     "Total tagihan: Rp " . number_format($data['total_amount'], 0, ',', '.') . ", " .
-                    "Saldo tersedia: Rp " . number_format($company->balance, 0, ',', '.') . ", " .
+                    "Saldo tersedia: Rp " . number_format($remainingBalance, 0, ',', '.') . ", " .
                     "Kekurangan: Rp " . number_format($shortfall, 0, ',', '.');
                 return $this->errorResponse($errorMessage, 422);
             }
@@ -440,7 +442,7 @@ class InvoiceController extends Controller
             $data['approval_status'] = 'approved';
             $data['approved_by_user_id'] = $user->id;
             $data['approved_at'] = now();
-            $data['payment_status'] = 'paid';
+            $data['status'] = 'paid';
             $data['paid_at'] = now();
 
             $invoice = Invoice::create($data);
@@ -452,15 +454,15 @@ class InvoiceController extends Controller
                 'out_by_user_id' => $user->id
             ]);
 
-            $company->decrement('balance', $data['total_amount']);
-
             $invoice->payments()->create([
+                'company_id' => $company->id,
+                'invoice_id' => $invoice->id,
                 'amount' => $data['total_amount'],
                 'payment_method' => 'balance_deduction',
-                'payment_date' => now(),
-                'created_by_user_id' => $user->id,
                 'status' => 'completed',
-                'description' => 'Pembayaran otomatis melalui pemotongan saldo'
+                'description' => 'Pembayaran otomatis melalui pemotongan saldo',
+                'created_by_user_id' => $user->id,
+                'paid_at' => now(),
             ]);
 
             $invoice->remarks()->create([
@@ -475,7 +477,7 @@ class InvoiceController extends Controller
 
             $invoice->load(['company:id,name', 'createdBy:id,name', 'items']);
 
-            return $this->successResponse($invoice, 'Invoice berhasil dibuat dan dibayar otomatis', 201);
+            return $this->successResponse(null, 'Invoice berhasil dibuat dan dibayar otomatis', 201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal membuat invoice otomatis: ' . $e->getMessage());
