@@ -53,9 +53,12 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        $role = $user->roles->first();
+
         $response = [
             'name' => $user->name,
-            'role' => $user->roles->pluck('name'),
+            'role' => $role ? $role->name : null,
+            'role_type' => $role ? $role->type : null,
             'email' => $user->email,
             'permissions' => $user->getPermissionsViaRoles()->pluck('name'),
         ];
