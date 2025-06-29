@@ -3,11 +3,15 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Traits\ApiResponse;
 
 class UpdateAirlineRequest extends FormRequest
 {
+    use ApiResponse;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -25,8 +29,18 @@ class UpdateAirlineRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('airlines', 'code')->ignore($this->airline),
+            ],
+            'cargo_handling_incoming_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'cargo_handling_outgoing_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'handling_airplane_outgoing_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'handling_airplane_incoming_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'jppgc_incoming_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
+            'jppgc_outgoing_price' => 'required|numeric|min:0|regex:/^\d+(\.\d{1,2})?$/',
         ];
     }
 
@@ -39,10 +53,31 @@ class UpdateAirlineRequest extends FormRequest
             'code.required' => 'Kode airline harus diisi',
             'code.string' => 'Kode airline harus berupa string',
             'code.max' => 'Kode airline maksimal 255 karakter',
-            'price.required' => 'Harga harus diisi',
-            'price.numeric' => 'Harga harus berupa angka',
-            'price.min' => 'Harga harus lebih dari 0',
-            'price.regex' => 'Harga harus berupa angka dan maksimal 2 desimal',
+            'code.unique' => 'Kode airline sudah ada',
+            'cargo_handling_incoming_price.required' => 'Harga cargo handling incoming harus diisi',
+            'cargo_handling_incoming_price.numeric' => 'Harga cargo handling incoming harus berupa angka',
+            'cargo_handling_incoming_price.min' => 'Harga cargo handling incoming harus lebih dari 0',
+            'cargo_handling_incoming_price.regex' => 'Harga cargo handling incoming harus berupa angka dan maksimal 2 desimal',
+            'cargo_handling_outgoing_price.required' => 'Harga cargo handling outgoing harus diisi',
+            'cargo_handling_outgoing_price.numeric' => 'Harga cargo handling outgoing harus berupa angka',
+            'cargo_handling_outgoing_price.min' => 'Harga cargo handling outgoing harus lebih dari 0',
+            'cargo_handling_outgoing_price.regex' => 'Harga cargo handling outgoing harus berupa angka dan maksimal 2 desimal',
+            'handling_airplane_outgoing_price.required' => 'Harga handling airplane outgoing harus diisi',
+            'handling_airplane_outgoing_price.numeric' => 'Harga handling airplane outgoing harus berupa angka',
+            'handling_airplane_outgoing_price.min' => 'Harga handling airplane outgoing harus lebih dari 0',
+            'handling_airplane_outgoing_price.regex' => 'Harga handling airplane outgoing harus berupa angka dan maksimal 2 desimal',
+            'handling_airplane_incoming_price.required' => 'Harga handling airplane incoming harus diisi',
+            'handling_airplane_incoming_price.numeric' => 'Harga handling airplane incoming harus berupa angka',
+            'handling_airplane_incoming_price.min' => 'Harga handling airplane incoming harus lebih dari 0',
+            'handling_airplane_incoming_price.regex' => 'Harga handling airplane incoming harus berupa angka dan maksimal 2 desimal',
+            'jppgc_incoming_price.required' => 'Harga JPPGC incoming harus diisi',
+            'jppgc_incoming_price.numeric' => 'Harga JPPGC incoming harus berupa angka',
+            'jppgc_incoming_price.min' => 'Harga JPPGC incoming harus lebih dari 0',
+            'jppgc_incoming_price.regex' => 'Harga JPPGC incoming harus berupa angka dan maksimal 2 desimal',
+            'jppgc_outgoing_price.required' => 'Harga JPPGC outgoing harus diisi',
+            'jppgc_outgoing_price.numeric' => 'Harga JPPGC outgoing harus berupa angka',
+            'jppgc_outgoing_price.min' => 'Harga JPPGC outgoing harus lebih dari 0',
+            'jppgc_outgoing_price.regex' => 'Harga JPPGC outgoing harus berupa angka dan maksimal 2 desimal',
         ];
     }
 
