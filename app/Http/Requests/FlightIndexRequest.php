@@ -16,6 +16,7 @@ class FlightIndexRequest extends PaginationRequest
             'airline_id' => 'nullable|integer|exists:airlines,id',
             'arrival_time_start' => 'nullable|date|before_or_equal:arrival_time_end',
             'arrival_time_end' => 'nullable|date|after_or_equal:arrival_time_start',
+            'flight_date' => 'nullable|date',
         ];
     }
 
@@ -34,6 +35,7 @@ class FlightIndexRequest extends PaginationRequest
             'arrival_time_start.before_or_equal' => 'Waktu kedatangan mulai harus sebelum atau sama dengan waktu akhir',
             'arrival_time_end.date' => 'Waktu kedatangan akhir harus berupa tanggal yang valid',
             'arrival_time_end.after_or_equal' => 'Waktu kedatangan akhir harus setelah atau sama dengan waktu mulai',
+            'flight_date.date' => 'Tanggal penerbangan harus berupa tanggal yang valid',
         ];
     }
 
@@ -49,6 +51,7 @@ class FlightIndexRequest extends PaginationRequest
             'airline_id' => 'maskapai',
             'arrival_time_start' => 'waktu kedatangan mulai',
             'arrival_time_end' => 'waktu kedatangan akhir',
+            'flight_date' => 'tanggal penerbangan',
         ];
     }
 }

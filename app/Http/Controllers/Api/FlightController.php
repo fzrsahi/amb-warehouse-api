@@ -42,6 +42,10 @@ class FlightController extends Controller
                 $query->whereDate('arrival_time', '<=', $request->arrival_time_end);
             }
 
+            if ($request->flight_date) {
+                $query->whereDate('flight_date', $request->flight_date);
+            }
+
             if ($request->sort_by) {
                 $sortOrder = $request->sort_order ?? 'asc';
                 $query->orderBy($request->sort_by, $sortOrder);
