@@ -13,6 +13,7 @@ class DepositIndexRequest extends PaginationRequest
     {
         return [
             'status' => 'nullable|string|in:submit,approve,reject',
+            'company_id' => 'nullable|integer|exists:companies,id',
         ];
     }
 
@@ -25,6 +26,8 @@ class DepositIndexRequest extends PaginationRequest
     {
         return [
             'status.in' => 'Status harus submit, approve, atau reject',
+            'company_id.integer' => 'ID perusahaan harus berupa angka',
+            'company_id.exists' => 'Perusahaan tidak ditemukan',
         ];
     }
 
@@ -37,6 +40,7 @@ class DepositIndexRequest extends PaginationRequest
     {
         return [
             'status' => 'status',
+            'company_id' => 'perusahaan',
         ];
     }
 }

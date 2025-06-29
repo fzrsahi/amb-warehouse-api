@@ -28,7 +28,9 @@ class DepositController extends Controller
                 ]);
 
             if ($user->hasRole('super-admin')) {
+                // Super admin dapat melihat semua deposit
             } elseif ($user->hasRole('warehouse-admin')) {
+                // Warehouse admin dapat melihat semua deposit
             } elseif ($user->company_id) {
                 $query->where('company_id', $user->company_id);
             } else {
@@ -44,6 +46,11 @@ class DepositController extends Controller
             // Apply status filter
             if ($request->status) {
                 $query->where('status', $request->status);
+            }
+
+            // Apply company_id filter (untuk admin/warehouse yang ingin filter berdasarkan company tertentu)
+            if ($request->company_id && ($user->hasRole('super-admin') || $user->hasRole('warehouse-admin'))) {
+                $query->where('company_id', $request->company_id);
             }
 
             // Apply sorting
